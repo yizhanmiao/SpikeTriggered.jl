@@ -1,7 +1,7 @@
 name = "SpikeTriggered"
 uuid = "3c99cc20-eaca-4e17-bd25-d7dac35e9bca"
-authors = ["Yizhan Miao <yzmiao@pm.me>"]
 version = "0.16.0"
+authors = ["Yizhan Miao <yizhanmi@usc.edu>"]
 
 [deps]
 DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
@@ -10,6 +10,7 @@ FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
 FHist = "68837c9b-b678-4cd5-9925-8a54edc8f695"
 FLoops = "cc61a311-1640-44b5-9fba-1b764f453329"
 GSL = "92c85e6c-cbff-5e0c-80f7-495c94daaecd"
+GeometryBasics = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -18,3 +19,5 @@ SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 ToeplitzMatrices = "c751599d-da0a-543b-9d20-d0a503d91d24"
+
+[compat]

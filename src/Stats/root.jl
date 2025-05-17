@@ -11,6 +11,7 @@ using Distributions: cdf, Normal
 using FLoops: @floop
 using FHist: Hist1D, bincounts
 using ToeplitzMatrices: Circulant
+using GeometryBasics: Point2
 using Optim: optimize, NelderMead, Options as OptimOptions
 
 const SpikeRaster{T} = Vector{Vector{T}}
@@ -20,7 +21,6 @@ const AbstractStimulus{T} = AbstractMatrix{T}  # [nDimensions x nTimepoints]
 const AbstractMarker{T} = AbstractVecOrMat{T}  # [nTimepoints] or [nTimepoints x nRepeats]
 
 export SpikeRaster, AbstractSpikeTrain
-export make_strf, hstack_strf
 export spike_raster
 export spike_histogram, spike_histogram_smoothed
 export spike_triggered_average, spike_triggered_average_zscore, spike_triggered_average_suite
@@ -36,14 +36,12 @@ include("spike_triggered_average.jl")
 include("footprint.jl")
 include("burst.jl")
 include("spectrum.jl")
-include("gaussian_fit.jl")
+include("strf/strf.jl")
 
 #TODO: review the functions below and make documentations
 include("jpsth.jl")
 include("reliability.jl")
 include("correlogram.jl")
 include("spike_triggered_covariance.jl")
-include("srf/srf.jl")
-# include("spike_triggered.jl")
 
 end

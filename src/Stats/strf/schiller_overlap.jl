@@ -1,5 +1,7 @@
+export srf_schiller_overlap_index
+
 @doc raw"""
-    schiller_overlap_index(e1::GaussianEllipse, e2::GaussianEllipse)
+    srf_schiller_overlap_index(e1::GaussianEllipse, e2::GaussianEllipse)
 
 overlap of two spatial receptive fields based on Schiller's overlap index.
 
@@ -26,7 +28,7 @@ Where $d$ is the Euclidian distance between the centers, and:
 - Schiller et al., 1979
 - Wang et al., 2007
 """
-function schiller_overlap_index(e1::GaussianEllipse, e2::GaussianEllipse)
+function srf_schiller_overlap_index(e1::GaussianEllipse, e2::GaussianEllipse)
     _sigma_sum = _schiller_sigma(e1, e2) + _schiller_sigma(e2, e1)
     _d = sum(abs2, (e1.center_x - e2.center_x, e1.center_y - e2.center_y)) |> sqrt
     (_sigma_sum - _d) / (_sigma_sum + _d)
