@@ -1,5 +1,5 @@
 module Waveforms
-import GSL
+using GSL: GSL
 using DSP: conv, Lowpass, Bandpass, Highpass, Butterworth, filtfilt, digitalfilter
 using Statistics: median
 

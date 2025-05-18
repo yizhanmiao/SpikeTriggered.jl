@@ -19,7 +19,7 @@ function dispersion_index(psth; corrected=true, kwargs...)
 end
 
 # gaussian distribution cumulative density, single sided
-normcdf(x::T) where {T <: Real} = erfc(- x / sqrt(T(2))) / 2
+normcdf(x::T) where {T<:Real} = erfc(- x / sqrt(T(2))) / 2
 
 # inverse of normcdf
-norminv(x::T) where {T <: Real} = erfcinv(2 * x) * (- sqrt(T(2)))
+norminv(x::T) where {T<:Real} = erfcinv(2 * x) * (- sqrt(T(2)))

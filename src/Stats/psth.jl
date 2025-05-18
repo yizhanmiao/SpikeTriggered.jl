@@ -14,7 +14,7 @@ Edges would work as: left bound <= value < right bound.
 
 Note: StatsBase.Histogram is slower than GSL but with less memory footprint.
 """
-function histogram_gsl(u_arr::AbstractVector{T}, edges) where {T <: Real}
+function histogram_gsl(u_arr::AbstractVector{T}, edges) where {T<:Real}
     u_arr = Cdouble.(u_arr)
     edges = Cdouble.(edges)
 
@@ -62,10 +62,12 @@ If `spike_train` is empty, it will return `zeros(T, n)`
 
 If `counttype` is not specified, the returned vector will have same type `T`
 """
-function spike_histogram(spk::AbstractSpikeTrain{T}, edges::AbstractVector;
-    dtype::Union{Type, Nothing}=nothing, kwargs...
-    ) where {T <: Real}
-
+function spike_histogram(
+    spk::AbstractSpikeTrain{T},
+    edges::AbstractVector;
+    dtype::Union{Type,Nothing}=nothing,
+    kwargs...,
+) where {T<:Real}
     dtype = isnothing(dtype) ? T : dtype
     if isempty(spk)
         zeros(dtype, length(edges)-1)
@@ -97,9 +99,9 @@ PSTH from averaging rasters.
 
 If `norm` is `true`, PSTH will be normalized by the length of trials.
 """
-function spike_histogram(raster::SpikeRaster{T}, args...;
-    norm::Bool=true, kwargs...) where {T <: Real}
-
+function spike_histogram(
+    raster::SpikeRaster{T}, args...; norm::Bool=true, kwargs...
+) where {T<:Real}
     _flatten = reduce(vcat, raster; init=T[])
     _psth = spike_histogram(_flatten, args...; kwargs...)
     norm ? _psth ./ length(raster) : _psth
@@ -110,12 +112,16 @@ end
 
 get the center of edge vector. make sure edges are sorted.
 """
-get_histogram_center(edges::AbstractVector) = edges[1:end-1] .+ diff(edges) ./ 2
+get_histogram_center(edges::AbstractVector) = edges[1:(end - 1)] .+ diff(edges) ./ 2
 
 #### Smoothed PSTH
 
-@deprecate spike_filter(spk, proj, kernel; norm_by=nothing, kwargs...) spike_histogram_smoothed(spk, proj, kernel; norm=isnothing(norm_by), kwargs...)
-@deprecate spike_filter_gaussian(spk_or_raster, proj; kwargs...) spike_histogram_smoothed(spk_or_raster, proj; kwargs...)
+@deprecate spike_filter(spk, proj, kernel; norm_by=nothing, kwargs...) spike_histogram_smoothed(
+    spk, proj, kernel; norm=isnothing(norm_by), kwargs...
+)
+@deprecate spike_filter_gaussian(spk_or_raster, proj; kwargs...) spike_histogram_smoothed(
+    spk_or_raster, proj; kwargs...
+)
 
 @doc raw"""
     spike_histogram_smoothed(spike_train::SpikeTrain{T}, projection::AbstractArray, kernel::Function=gaussian_kernel; norm=true, kwargs...) -> Vector{T}
@@ -135,9 +141,8 @@ function spike_histogram_smoothed(
     proj::AbstractArray,
     kernel::Function=gaussian_kernel;
     norm=true,
-    kwargs...
-    ) where {T <: Real}
-
+    kwargs...,
+) where {T<:Real}
     isempty(spk) && (return zeros(T, size(proj)))
     _psth = similar(proj, T)
     @floop for idx in eachindex(proj)
@@ -154,7 +159,9 @@ Generating smoothed PSTH from rasters.
 If `norm` is `true`, PSTH will be normalized to the maximum number;
 otherwise, it will be divided by the number of trials in the raster.
 """
-function spike_histogram_smoothed(raster::SpikeRaster{T}, args...; norm=false, kwargs...) where {T <: Real}
+function spike_histogram_smoothed(
+    raster::SpikeRaster{T}, args...; norm=false, kwargs...
+) where {T<:Real}
     _flatten = reduce(vcat, raster; init=T[])
     _N = length(raster)
     if norm
@@ -173,4 +180,5 @@ Inline [Gaussian function](https://en.wikipedia.org/wiki/Gaussian_filter).
 g(x) = \frac{\exp(-\frac{x^2}{2 σ^2})}{\sqrt{2\pi} σ}
 ```
 """
-@inline gaussian_kernel(x::T; σ::T=0.005) where{T <: AbstractFloat} = exp(x^2 / (- 2 * σ ^ 2)) / (σ * sqrt(2 * T(π)))
+@inline gaussian_kernel(x::T; σ::T=0.005) where {T<:AbstractFloat} =
+    exp(x^2 / (- 2 * σ ^ 2)) / (σ * sqrt(2 * T(π)))

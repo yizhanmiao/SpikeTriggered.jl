@@ -19,10 +19,10 @@ function dispersion_index(psth; corrected=true, kwargs...)
 end
 
 # gaussian distribution cumulative density, single sided, use `cdf(Normal(), x)` instead
-normcdf(x::T) where {T <: Real} = erfc(- x / sqrt(T(2))) / 2
+normcdf(x::T) where {T<:Real} = erfc(- x / sqrt(T(2))) / 2
 
 # inverse of normcdf: use `quantile(Normal(), x)` instead
-norminv(x::T) where {T <: Real} = erfcinv(2 * x) * (- sqrt(T(2)))
+norminv(x::T) where {T<:Real} = erfcinv(2 * x) * (- sqrt(T(2)))
 
 # @doc raw"""
 #     make_strf(val; gridsize) -> Array{T, 3} SxSxT
@@ -37,7 +37,6 @@ norminv(x::T) where {T <: Real} = erfcinv(2 * x) * (- sqrt(T(2)))
 #     #TODO: check which axis is width and which is height
 #     collect(reshape(val, gridsize, gridsize, :))
 # end
-
 
 # function hstack_strf(val::AbstractArray; kwargs...)
 #     _strf = make_strf(val; kwargs...)

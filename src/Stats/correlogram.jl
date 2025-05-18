@@ -42,7 +42,9 @@ at specific time delays with respect the spikes of the reference cell.
 If there are multiple trials, use the `spike_xcorr_shifted` to correct
 any bias with a shift predictor.
 """
-function spike_xcorr(target::AbstractVector{T}, reference::AbstractVector{T}, roi::AbstractVector) where {T <: Real}
+function spike_xcorr(
+    target::AbstractVector{T}, reference::AbstractVector{T}, roi::AbstractVector
+) where {T<:Real}
     rez = zeros(Int, length(roi)-1)
     for ref_t in reference
         _my_psth = spike_histogram(target .- ref_t, roi)
@@ -62,10 +64,13 @@ Corrected with a shift predictor.
 - shift_t: Δt of each shift, usually shift the spike by trials
 - shift_t_end: the end limit of spike_time, usually the end time of the last trial. [default: maximum(reference)]
 """
-function spike_xcorr_shifted(target::AbstractVector{T}, reference::AbstractVector{T}, roi::AbstractVector;
-        shift_t::AbstractVector{T},
-        shift_t_end::Union{Nothing, T}=nothing
-        ) where {T <: Real}
+function spike_xcorr_shifted(
+    target::AbstractVector{T},
+    reference::AbstractVector{T},
+    roi::AbstractVector;
+    shift_t::AbstractVector{T},
+    shift_t_end::Union{Nothing,T}=nothing,
+) where {T<:Real}
     raw = spike_xcorr(target, reference, roi)
     shift_t_end = isnothing(shift_t_end) ? maximum(reference) : shift_t_end
     shift_predictor_mat = zeros(Int, length(roi)-1, length(shift_t))
@@ -79,12 +84,12 @@ end
 
 #TODO: crosscorrelogram from rasters, spike_xcorr_shifted(target_raster, reference_raster, roi::AbstractVector)
 
-function cross_correlation(f::AbstractArray{T}, g::AbstractArray{T}, dims=1) where {T <: Real}
+function cross_correlation(f::AbstractArray{T}, g::AbstractArray{T}, dims=1) where {T<:Real}
     N = size(f, dims)
     @assert reduce(&, size(f) .== size(g)) "input sizes are not matched."
     fft_plan = FFTW.plan_rfft(f, dims)
 
-    F_bar = fft_plan * f .|> conj
+    F_bar = conj.(fft_plan * f)
     G = fft_plan * g
 
     _xcorr = abs.(FFTW.irfft(F_bar .* G, N, dims))
@@ -108,7 +113,6 @@ function auto_correlation(f, dims=1; corrected=false)
     end
 end
 
-
 @doc raw"""
 
 The covariogram is defined as:
@@ -117,7 +121,7 @@ The covariogram is defined as:
 V \equiv \langle (S_1^{r} - P_1) \odot (S_2^{r} - P_2) \rangle = \langle S_1^{r} \odot S_2^{r} \rangle - P_1 \odot P_2
 ```
 """
-function covariogram(S1::AbstractMatrix{T}, S2::AbstractMatrix{T}; fs=1) where {T <: Real}
+function covariogram(S1::AbstractMatrix{T}, S2::AbstractMatrix{T}; fs=1) where {T<:Real}
     N = size(S1, 2)
     P1 = mean(S1, dims=2)[:]
     P2 = mean(S2, dims=2)[:]
@@ -128,7 +132,11 @@ function covariogram(S1::AbstractMatrix{T}, S2::AbstractMatrix{T}; fs=1) where {
     raw_xcorr = mean(raw_xcorr_mat, dims=2)[:]
     shuffle_corr = cross_correlation(P1, P2)
     V = raw_xcorr .- shuffle_corr
-    σsqV = (cross_correlation(σsq1, σsq2) .+ cross_correlation(P1.^2, σsq2) .+ cross_correlation(σsq1, P2.^2)) ./ N
+    σsqV =
+        (
+            cross_correlation(σsq1, σsq2) .+ cross_correlation(P1 .^ 2, σsq2) .+
+            cross_correlation(σsq1, P2 .^ 2)
+        ) ./ N
     σV = sqrt.(σsqV)
     trange = cross_correlation_window(S1, 1; fs)
     (; t=trange, V, σ=σV)

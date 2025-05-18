@@ -1,7 +1,9 @@
 @doc raw"""
     spike_triggered_covariance(X::AbstractMatrix{T}, y::AbstractArray{T}; n::Integer=10, verbose=true) where {T, U} -> Matrix{T}
 """
-function spike_triggered_covariance(X::AbstractMatrix{T}, y::AbstractArray{T}; n::Integer=10, verbose=true) where {T}
+function spike_triggered_covariance(
+    X::AbstractMatrix{T}, y::AbstractArray{T}; n::Integer=10, verbose=true
+) where {T}
     _Nx = size(X, 1)
 
     _sta = spike_triggered_average(X, y; n, norm=false)
@@ -12,7 +14,7 @@ function spike_triggered_covariance(X::AbstractMatrix{T}, y::AbstractArray{T}; n
     _y = mean(y, dims=2)[:]
 
     for idx in 1:length(_y)
-        _ind = (((idx):(-1):(idx-n+1)) .- 1) .% _Nx .+ 1
+        _ind = (((idx):(-1):(idx - n + 1)) .- 1) .% _Nx .+ 1
         _ind[_ind .< 1] .= _ind[_ind .< 1] .+ _Nx
 
         _s = X[_ind, :][:]

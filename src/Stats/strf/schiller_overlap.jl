@@ -30,7 +30,7 @@ Where $d$ is the Euclidian distance between the centers, and:
 """
 function srf_schiller_overlap_index(e1::GaussianEllipse, e2::GaussianEllipse)
     _sigma_sum = _schiller_sigma(e1, e2) + _schiller_sigma(e2, e1)
-    _d = sum(abs2, (e1.center_x - e2.center_x, e1.center_y - e2.center_y)) |> sqrt
+    _d = sqrt(sum(abs2, (e1.center_x - e2.center_x, e1.center_y - e2.center_y)))
     (_sigma_sum - _d) / (_sigma_sum + _d)
 end
 
@@ -38,7 +38,7 @@ function _schiller_sigma(ei, ej)
     _phi = _schiller_phi(ei, ej)
     ei.axis_major * ei.axis_minor / sqrt(
         (ei.axis_major * sin(ei.rotation - _phi))^2 +
-        (ei.axis_minor * cos(ei.rotation - _phi))^2
+        (ei.axis_minor * cos(ei.rotation - _phi))^2,
     )
 end
 

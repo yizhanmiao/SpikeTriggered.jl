@@ -7,13 +7,17 @@ with interval of `(marker-head, marker+duration+tail]`.
 
 If `offset` is `true`, spike times of each trial be relative to the onset time.
 """
-function spike_raster(spk::AbstractVector{T}, markers::AbstractVector;
-    head::Real=0.5, duration::Real=1.0, tail::Real=0.5, offset::Bool=true
-    ) where {T <: Real}
-
+function spike_raster(
+    spk::AbstractVector{T},
+    markers::AbstractVector;
+    head::Real=0.5,
+    duration::Real=1.0,
+    tail::Real=0.5,
+    offset::Bool=true,
+) where {T<:Real}
     output = Vector{T}[]
     for item in markers
-        _candidates = spk[(item-head) .< spk .<= (item+duration+tail)]
+        _candidates = spk[(item - head) .< spk .<= (item + duration + tail)]
         if offset
             push!(output, _candidates .- item)
         else
