@@ -23,7 +23,6 @@ const AbstractMarker{T} = AbstractVecOrMat{T}  # [nTimepoints] or [nTimepoints x
 export SpikeRaster, AbstractSpikeTrain
 export spike_triggered_average,
     spike_triggered_average_zscore, spike_triggered_average_suite
-export spike_train_spectrum_power
 export srf_gaussian_fit, Gaussian2DSimplex, Gaussian2DSimplexInit
 
 include("misc.jl")
