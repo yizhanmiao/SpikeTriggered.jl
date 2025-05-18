@@ -22,7 +22,6 @@ const AbstractMarker{T} = AbstractVecOrMat{T}  # [nTimepoints] or [nTimepoints x
 
 export SpikeRaster, AbstractSpikeTrain
 export spike_raster
-export spike_histogram, spike_histogram_smoothed
 export spike_triggered_average,
     spike_triggered_average_zscore, spike_triggered_average_suite
 export spike_train_spectrum_power
