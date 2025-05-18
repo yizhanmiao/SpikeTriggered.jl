@@ -1,3 +1,4 @@
+export get_footprint_map, get_footprint_mask, benjamini_hochberg_constant
 
 @doc raw"""
     get_footprint_map([func_pval,] raw::AbstractArray; alpha=0.01, fdr_c=1, collapse=false, gridsize=nothing)
@@ -21,7 +22,9 @@ color codes as:
 - `0`: NO response
 - `-1`: OFF response
 """
-function get_footprint_map(func_pval::Function, raw::AbstractArray; collapse=false, gridsize=nothing, kwargs...)
+function get_footprint_map(
+    func_pval::Function, raw::AbstractArray; collapse=false, gridsize=nothing, kwargs...
+)
     @assert !(collapse && (gridsize isa Nothing)) "please specify gridsize to get collapsed footprint map"
 
     _mask = get_footprint_mask(func_pval, raw; kwargs...)
@@ -29,15 +32,20 @@ function get_footprint_map(func_pval::Function, raw::AbstractArray; collapse=fal
 
     if collapse
         #NOTE: polarity is set as the first sign of footprint
-        map(x->begin
+        map(
+            x -> begin
                 _idx = findfirst(abs.(x) .> 0)
                 _idx isa Nothing ? 0 : x[_idx]
-                end, eachslice(make_strf(_map; gridsize); dims=(1, 2)))
+            end,
+            eachslice(make_strf(_map; gridsize); dims=(1, 2)),
+        )
     else
         _map
     end
 end
-get_footprint_map(raw::AbstractArray; kwargs...) = get_footprint_map(zscore_pvalue, raw; kwargs...)
+function get_footprint_map(raw::AbstractArray; kwargs...)
+    return get_footprint_map(zscore_pvalue, raw; kwargs...)
+end
 
 @doc raw"""
     get_footprint_mask([func_pval::Function,] raw::AbstractArray; alpha=0.01, fdr_c=1)
@@ -58,14 +66,19 @@ inputs are zscore from standard normal distribution.
 function get_footprint_mask(func_pval::Function, raw::AbstractArray; alpha=0.01, fdr_c=1)
     pval = func_pval(raw)
     qval, qk = benjamini_hochberg_qvalue(pval; C=fdr_c)
-    get_footprint_mask_from_qvalue(qval, invperm(qk[:]); alpha) #NOTE: invperm only takes a vector.
+    return get_footprint_mask_from_qvalue(qval, invperm(qk[:]); alpha) #NOTE: invperm only takes a vector.
 end
-get_footprint_mask(raw::AbstractArray; kwargs...) = get_footprint_mask(zscore_pvalue, raw; kwargs...)
+
+function get_footprint_mask(raw::AbstractArray; kwargs...)
+    return get_footprint_mask(zscore_pvalue, raw; kwargs...)
+end
 
 #TODO: docs
 #NOTE: when N > 50, the difference is less than 0.01
 #NOTE: when N > 2000, the `sum` starts to be significantly slower than the approximation
-benjamini_hochberg_constant(N::Integer) = N>50 ? log(N) + Base.MathConstants.eulergamma + 1/N : sum(x->1/x, 1:N)
+function benjamini_hochberg_constant(N::Integer)
+    return N > 50 ? log(N) + Base.MathConstants.eulergamma + 1 / N : sum(x -> 1 / x, 1:N)
+end
 
 @doc raw"""
     benjamini_hochberg_qvalue(pvalue; C=1) -> (q::Array, k::Array)
@@ -88,7 +101,7 @@ function benjamini_hochberg_qvalue(pvalue::AbstractArray; C=1)
     k = reshape(invperm(sortperm(pvalue[:])), size(pvalue)...)
     qval = pvalue .* (N * C) ./ k
 
-    (qval, k)
+    return (qval, k)
 end
 
 @doc raw"""
@@ -98,7 +111,7 @@ get pvalue from standard normal distribution
 """
 function zscore_pvalue(zscore::AbstractArray; two_tailed=true)
     p = cdf(Normal(), -1 .* abs.(zscore))
-    two_tailed ? 2 .* p : p
+    return two_tailed ? 2 .* p : p
 end
 
 @doc raw"""
@@ -115,5 +128,5 @@ function get_footprint_mask_from_qvalue(qval, k; alpha=0.01)
         _mask[k[1:_cutoff]] .= true
     end
 
-    _mask
+    return _mask
 end
