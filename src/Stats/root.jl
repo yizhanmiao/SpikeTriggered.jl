@@ -26,12 +26,6 @@ export spike_histogram, spike_histogram_smoothed
 export spike_triggered_average,
     spike_triggered_average_zscore, spike_triggered_average_suite
 export get_footprint_map, get_footprint_mask, benjamini_hochberg_constant
-export burst_detect,
-    burst_detect_lgn,
-    burst_detect_lgn,
-    burst_interpolate,
-    split_tonic_burst,
-    split_tonic_cardinal
 export spike_train_spectrum_power
 export srf_gaussian_fit, Gaussian2DSimplex, Gaussian2DSimplexInit
 

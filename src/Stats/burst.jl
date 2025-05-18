@@ -1,3 +1,10 @@
+export burst_detect,
+    burst_detect_trn,
+    burst_detect_lgn,
+    split_tonic_burst,
+    split_tonic_cardinal,
+    burst_interpolate
+
 @doc raw"""
     burst_detect(spk::Vector; t_silence=0.07, t_isi=0.03, nofs=nothing, keep_index=false) -> Vector{Vector{T}}
 
@@ -122,7 +129,7 @@ Split spike train into burst and tonic groups using `detector` function.
 function split_tonic_burst(spk; detector=burst_detect, kwargs...)
     _burst_idx = detector(spk; keep_index=true, kwargs...)
     _spk = deepcopy(spk)
-    popat!(_spk, reduce(vcat, _burst_idx))
+    splice!(_spk, reduce(vcat, _burst_idx))
     (; burst=map(x -> spk[x], _burst_idx), tonic=_spk)
 end
 
@@ -135,7 +142,7 @@ But only the cardinal spike of burst is returned.
 function split_tonic_cardinal(spk; detector=burst_detect, kwargs...)
     _burst_idx = detector(spk; keep_index=true, kwargs...)
     _spk = deepcopy(spk)
-    popat!(_spk, reduce(vcat, _burst_idx))
+    splice!(_spk, reduce(vcat, _burst_idx))
     (; burst=map(x -> spk[x[1]], _burst_idx), tonic=_spk)
 end
 
