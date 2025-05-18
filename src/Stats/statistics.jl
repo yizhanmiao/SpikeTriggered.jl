@@ -1,4 +1,5 @@
-# Statistics
+
+export troi2tproj
 
 @doc raw"""
     dispersion_index(psth; corrected=true, kwargs...) -> Real
@@ -15,15 +16,17 @@ D = \frac{\sigma^2}{\mu}
 Check out more on [wikipedia](https://en.wikipedia.org/wiki/Index_of_dispersion).
 """
 function dispersion_index(psth; corrected=true, kwargs...)
-    var(psth; corrected, kwargs...) ./ mean(psth; kwargs...)
+    return var(psth; corrected, kwargs...) ./ mean(psth; kwargs...)
 end
 
 # gaussian distribution cumulative density, single sided
-normcdf(x::T) where {T<:Real} = erfc(- x / sqrt(T(2))) / 2
+normcdf(x::T) where {T<:Real} = erfc(-x / sqrt(T(2))) / 2
 
 # inverse of normcdf
-norminv(x::T) where {T<:Real} = erfcinv(2 * x) * (- sqrt(T(2)))
+norminv(x::T) where {T<:Real} = erfcinv(2 * x) * (-sqrt(T(2)))
 
 function modulation_index(Rpeak, Rnull)
-    (Rpeak - Rnull) / (Rpeak + Rnull)
+    return (Rpeak - Rnull) / (Rpeak + Rnull)
 end
+
+troi2tproj(; head, duration, tail, step=0.002) = range(-head; stop=duration + tail, step)
