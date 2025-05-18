@@ -30,6 +30,7 @@ include("footprint.jl")
 include("burst.jl")
 include("spectrum.jl")
 include("strf/strf.jl")
+include("drifting_grating.jl")
 
 #TODO: review the functions below and make documentations
 include("jpsth.jl")

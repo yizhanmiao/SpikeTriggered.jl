@@ -23,3 +23,7 @@ normcdf(x::T) where {T<:Real} = erfc(- x / sqrt(T(2))) / 2
 
 # inverse of normcdf
 norminv(x::T) where {T<:Real} = erfcinv(2 * x) * (- sqrt(T(2)))
+
+function modulation_index(Rpeak, Rnull)
+    (Rpeak - Rnull) / (Rpeak + Rnull)
+end
