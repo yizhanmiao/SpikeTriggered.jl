@@ -1,3 +1,4 @@
+export spike_raster
 
 @doc raw"""
     spike_raster(spike_train::AbstractVector{T}, markers::AbstractVector; head=0.5, duration=1.0, tail=0.5, offset=true) -> Vector{Vector{T}}
@@ -24,5 +25,5 @@ function spike_raster(
             push!(output, _candidates)
         end
     end
-    output
+    return output
 end

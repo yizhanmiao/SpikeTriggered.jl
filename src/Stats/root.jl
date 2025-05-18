@@ -21,7 +21,6 @@ const AbstractStimulus{T} = AbstractMatrix{T}  # [nDimensions x nTimepoints]
 const AbstractMarker{T} = AbstractVecOrMat{T}  # [nTimepoints] or [nTimepoints x nRepeats]
 
 export SpikeRaster, AbstractSpikeTrain
-export spike_raster
 export spike_triggered_average,
     spike_triggered_average_zscore, spike_triggered_average_suite
 export spike_train_spectrum_power
