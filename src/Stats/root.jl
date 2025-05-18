@@ -21,9 +21,8 @@ const AbstractStimulus{T} = AbstractMatrix{T}  # [nDimensions x nTimepoints]
 const AbstractMarker{T} = AbstractVecOrMat{T}  # [nTimepoints] or [nTimepoints x nRepeats]
 
 export SpikeRaster, AbstractSpikeTrain
-export srf_gaussian_fit, Gaussian2DSimplex, Gaussian2DSimplexInit
 
-include("misc.jl")
+include("statistics.jl")
 include("raster.jl")
 include("psth.jl")
 include("spike_triggered_average.jl")
