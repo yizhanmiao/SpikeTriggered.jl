@@ -24,7 +24,8 @@ The Fourier transform for the time window is defined by
 """
 function spike_train_spectrum_power(spks::AbstractSpikeTrain{T}, f; t_len=1) where {T <: AbstractFloat}
     ω = T(2 * pi * f)
-    _real = cos.(spks .* ω) |> sum
-    _imag = sin.(spks .* ω) |> sum
+    ϕ = spks .* ω
+    _real = sum(cos, ϕ)
+    _imag = sum(sin, ϕ)
     return (_real^2 + _imag^2) / t_len
 end
