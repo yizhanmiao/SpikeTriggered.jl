@@ -1,3 +1,7 @@
+export spike_triggered_average
+export spike_triggered_average_suite
+export spike_triggered_average_zscore
+
 @doc raw"""
     spike_triggered_average(stimulus, psth; n=10)
     spike_triggered_average(stimulus, spike_train, marker; n=10)
