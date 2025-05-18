@@ -1,10 +1,10 @@
 export strf_, strf_hstack
 
-const STRF{T} = Array{T,3} #[spatialX x spatialY x nTimepoints]
-const SRF{T} = Array{T,2} #[spatialX x spatialY]
+const STRF{T} = Array{T,3} #[Height x Width x nTimepoints]
+const SRF{T} = Array{T,2} #[Height x Width]
 const TRF{T} = Array{T,1} #[nTimepoints]
 
-strf_(x::AbstractArray, width::Integer, height::Integer) = reshape(x, width, height, :)
+strf_(x::AbstractArray, height::Integer, width::Integer) = reshape(x, height, width, :)
 strf_(x::AbstractArray; gridsize=16) = strf_(x, gridsize, gridsize)
 strf_(x::AbstractArray{T,2}) where {T} = begin
     nd = size(x, 1)
@@ -20,9 +20,9 @@ strf_hstack(x::AbstractArray{T,3}) where {T} = reduce(hcat, eachslice(x; dims=3)
 strf_hstack(x, args...; kwargs...) = strf_hstack(strf_(x, args...; kwargs...))
 
 @doc raw"""
-    strf_(val, width, height) -> Array{T, 3} XxYxT
-    strf_(val; gridsize=16) -> Array{T, 3} XxYxT
-    strf_(val::Matrix) -> Array{T, 3} XxYxT
+    strf_(val, height, width) -> Array{T, 3} HxWxT
+    strf_(val; gridsize=16) -> Array{T, 3} HxWxT
+    strf_(val::Matrix) -> Array{T, 3} HxWxT
 
 convert strf vector into 3d spatiotemporal matrix.
 
