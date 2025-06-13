@@ -1,4 +1,4 @@
-export GaussianEllipse, make_ellipse
+export GaussianEllipse, make_ellipse, make_heatmap
 export srf_gaussian_fit
 
 struct GaussianEllipse{T}
@@ -11,7 +11,7 @@ struct GaussianEllipse{T}
     bias::Union{T,Nothing}
 
     function GaussianEllipse(
-        A::T, a::T, b::T, x::T, y::T, θ::T, bias::Union{T,Nothing}
+        A::T, a::T, b::T, x::T, y::T, θ::T, bias::Union{T,Nothing}=nothing
     ) where {T}
         new{T}(A, a, b, x, y, θ, bias)
     end
@@ -27,15 +27,24 @@ function Base.collect(e::GaussianEllipse)
     return _rez
 end
 
-function make_ellipse(e::GaussianEllipse; kwargs...)
-    _make_ellipse(e.axis_major, e.axis_minor, e.rotation, e.center_x, e.center_y; kwargs...)
+function make_ellipse(e::GaussianEllipse; reversed=true, kwargs...)
+    #NOTE: rotation is inverted, because the y-axis is reversed during visualization
+    θ = reversed ? e.rotation * -1 : e.rotation
+    _make_ellipse(e.axis_major, e.axis_minor, θ, e.center_x, e.center_y; kwargs...)
+end
+
+function make_heatmap(e::GaussianEllipse; xrange=1:16, yrange=nothing)
+    (A, σx, σy, x0, y0, θ) = collect(e)[1:6]
+    _func = gaussian_2d(; A, σx, σy, x0, y0, θ)
+    yrange = isnothing(yrange) ? xrange : yrange
+    [_func(xi, yi) for yi in yrange, xi in xrange]
 end
 
 function _make_ellipse(a, b, θ, x0, y0; σ=1, step=100)
     t = range(0; stop=2*pi, length=step)
     ellipse_x_r = a .* cos.(t)
     ellipse_y_r = b .* sin.(t)
-    R = [cos(-θ) sin(-θ); -sin(-θ) cos(-θ)] .* σ
+    R = [cos(θ) sin(θ); -sin(θ) cos(θ)] .* σ
     r_ellipse = [ellipse_x_r ellipse_y_r] * R
     x = x0 .+ r_ellipse[:, 1]
     y = y0 .+ r_ellipse[:, 2]
@@ -43,60 +52,146 @@ function _make_ellipse(a, b, θ, x0, y0; σ=1, step=100)
 end
 
 @doc raw"""
-    image2dataset(image::AbstractMatrix) -> ([X Y], [Z])
+    image2dataset(image::AbstractMatrix; upsample=1, interp=Linear(), norm=false) -> ([X Y], [Z])
 
-convert 2d image into `(x, y)` coordinates and vector of elements (`z`).
+convert 2d image into matrix of `(x, y)` coordinates and matrix of elements (`z`).
 Primarilly used for 2d gaussian fit.
+
+Keyword Arguments:
+- upsample: ratio of upsampling, default as `1`` (i.e. no upsampling)
+- interp: upsampling method, default as `Linear()`` (using the `Interpolations.jl` package)
+- norm: flag to normalize the image value by its maximum, default as `false`
 """
-function image2dataset(image::AbstractMatrix{T}) where {T} # -> ([X Y], [Z])
-    N = length(image)
-    _coord = Matrix{Int64}(undef, N, 2)
-    _z = Vector{T}(undef, N)
-    for (idx, item) in enumerate(CartesianIndices(image))
-        _coord[idx, 1] = item[2] # x
-        _coord[idx, 2] = item[1] # y
-        _z[idx] = image[item]
+function image2dataset(
+    image::AbstractMatrix;
+    upsample=1, interp=Linear(),
+    norm = false,
+    )
+    
+    gridsize = size(image)
+    _frm = interpolate(image, BSpline(interp), OnGrid())
+    _sample_ind = [(xi, yi) for yi in 1:(1/upsample):gridsize[2], xi in 1:(1/upsample):gridsize[1]]
+
+    _x = map(identity, _sample_ind)
+    _y = map(x->_frm[x[2], x[1]], _sample_ind)
+    #NOTE: # srf is organized as HxW, ie: [y, x]
+
+    _y = norm ? _y ./ maximum(abs, _y) : _y
+
+    return (_x, _y)
+end
+
+function gaussian_2d_param(; A, x0, y0, a, b, c, bias=0)
+    (x, y) -> begin
+        dx = x - x0
+        dy = y - y0
+        dd = [dx; dy]
+
+        rot = [
+            a b
+            b c
+                ]
+        A * exp(-sum(rot .* (dd * dd'))) + bias
     end
-    _coord, _z
+end
+
+function gaussian_2d(; A, x0, y0, θ, σx, σy, bias=0)
+    (a, b, c) = gaussian_2d_param_proj(; θ, σx, σy)
+    (x, y) -> begin
+        A * exp(-(a * abs2(x - x0) + 2 * b * (x-x0) * (y-y0) + c * abs2(y - y0))) + bias
+    end
+end
+
+gaussian_2d_param_interp(; a, b, c) = begin
+    θ = atan(2b/(a-c))/2
+    σx = 1/sqrt(2(a * cos(θ)^2 + 2b*cos(θ)sin(θ) + c * sin(θ)^2))
+    σy = 1/sqrt(2(a * sin(θ)^2 - 2b*cos(θ)sin(θ) + c * cos(θ)^2))
+    (θ, σx, σy)
+end
+
+gaussian_2d_param_proj(; θ, σx, σy) = begin
+    a = cos(θ)^2 / (2*σx^2) + sin(θ)^2 / (2*σy^2)
+    b = - sin(θ)cos(θ) / (2*σx^2) + sin(θ)cos(θ) / (2*σy^2)
+    c = sin(θ)^2 / (2*σx^2) + cos(θ)^2 / (2*σy^2)
+    (a, b, c)
 end
 
 function _loss_srf_gaussian_fit_least_square(X, Y)
     (param) -> begin
-        (A, a, b, x0, y0, θ, bias) = length(param) == 6 ? [param; 0] : param
-
-        â = cos(θ^2)/(2 * a^2) + sin(θ^2)/(2 * b^2)
-        b̂ = sin(2*θ)/(4 * a^2) - sin(2*θ)/(4 * b^2)
-        ĉ = sin(θ^2)/(2 * a^2) + cos(θ^2)/(2 * b^2)
-        _deltaX = X[:, 1] .- x0
-        _deltaY = X[:, 2] .- y0
-        _raw = @. A * exp(-(â * _deltaX^2 + b̂ * _deltaX * _deltaY + ĉ * _deltaY^2)) +
-            bias
-
-        return mean(abs2, _raw .- Y)
+        (A, σx, σy, x0, y0, θ, bias) = length(param) == 6 ? [param; 0] : param
+        _func = gaussian_2d(; A, σx, σy, x0, y0, θ, bias)
+        ŷ = map(x->_func(x...), X)
+        return sum(abs2, ŷ .- Y)
     end
 end
 
+@doc raw"""
+    srf_gaussian_fit(
+        srf::AbstractMatrix{T};
+        norm=false, upsample=1, interp=Linear(),
+        optim_algorithm=NelderMead(),
+        optim_option=OptimOptions(),
+        param_init=nothing,
+        bias=false,
+        dev=false,
+        verbose=false,
+    ) -> GaussianEllipse{T}
+
+2D Gaussian fit of one spatial receptive field heatmap.
+
+Keyword Arguments:
+- norm: flag to normalize the image value by its maximum, default as `false`
+- upsample: ratio of upsampling, default as `1`` (i.e. no upsampling)
+- interp: upsampling method, default as `Linear()`` (using the `Interpolations.jl` package)
+- optim_algorithm: optimization algorithm from `Optim.jl`, default as `NelderMead()` (which should be the same algorithm of `fminsearch` in MATLAB)
+- optim_option: Optim.Options
+- param_init: initial parameters to overwrite the default method.
+- bias: flag to include a bias term in the 2D Gaussian function, default as `false`.
+- dev: flag to return the Optim result, otherwise return a GaussianEllipse object, default as `false`.
+- verbose: to print optimization output, default as `false`.
+"""
 function srf_gaussian_fit(
-    srf::AbstractMatrix{T}; param0=nothing, bias=true, optim_options=(;), raw=false
+    srf::AbstractMatrix{T};
+    upsample=1, norm =false, interp=Linear(),
+    optim_algorithm=NelderMead(),
+    optim_option = OptimOptions(),
+    param_init = nothing,
+    bias = false,
+    dev = false,
+    verbose = false,
 ) where {T}
-    X, Y = image2dataset(srf)
-    param_0 = if isnothing(param0)
-        _p = T[
-            maximum(Y);
-            1;
-            1;
-            mean(X, weights(Y), 1)[:];
-            0.1;
+    (X, y) = image2dataset(srf; upsample, norm, interp)
+
+    param_0 = if isnothing(param_init)
+        _param = T[
+            maximum(y), # A
+            rand()*2, rand()*2, #σa, σb
+            mean(first.(X), weights(y)), #x0
+            mean(last.(X), weights(y)), # y0
+            (rand()-0.5) * pi/2, # θ NOTE: init values within [-45deg, 45deg]
+            # rand() # bias
         ]
-        bias && push!(_p, mean(Y))
-        _p
+        bias && push!(_param, rand(T)) # bias
+        _param
     else
-        param0
+        collect(T, param_init)
     end
 
-    loss = _loss_srf_gaussian_fit_least_square(X, Y)
-    rez = optimize(loss, param_0, NelderMead(), OptimOptions(; optim_options...))
-    return (raw ? rez : GaussianEllipse(rez.minimizer))
+    _loss = _loss_srf_gaussian_fit_least_square(X, y)
+    rez = optimize(_loss, param_0, optim_algorithm, optim_option)
+    
+    verbose && (@show rez)
+
+    if dev
+        rez
+    else
+        _param = minimizer(rez)
+        if length(_param) == 6
+            GaussianEllipse(_param..., nothing)
+        else
+            GaussianEllipse(_param...)
+        end
+    end
 end
 
 include("schiller_overlap.jl")
