@@ -13,7 +13,7 @@ struct GaussianEllipse{T}
     function GaussianEllipse(
         A::T, a::T, b::T, x::T, y::T, θ::T, bias::Union{T,Nothing}=nothing
     ) where {T}
-        new{T}(A, a, b, x, y, θ, bias)
+        return new{T}(A, a, b, x, y, θ, bias)
     end
     GaussianEllipse(param::AbstractArray{T}) where {T} = GaussianEllipse(param...)
 end
@@ -30,25 +30,25 @@ end
 function make_ellipse(e::GaussianEllipse; reversed=true, kwargs...)
     #NOTE: rotation is inverted, because the y-axis is reversed during visualization
     θ = reversed ? e.rotation * -1 : e.rotation
-    _make_ellipse(e.axis_major, e.axis_minor, θ, e.center_x, e.center_y; kwargs...)
+    return _make_ellipse(e.axis_major, e.axis_minor, θ, e.center_x, e.center_y; kwargs...)
 end
 
 function make_heatmap(e::GaussianEllipse; xrange=1:16, yrange=nothing)
     (A, σx, σy, x0, y0, θ) = collect(e)[1:6]
     _func = gaussian_2d(; A, σx, σy, x0, y0, θ)
     yrange = isnothing(yrange) ? xrange : yrange
-    [_func(xi, yi) for yi in yrange, xi in xrange]
+    return [_func(xi, yi) for yi in yrange, xi in xrange]
 end
 
 function _make_ellipse(a, b, θ, x0, y0; σ=1, step=100)
-    t = range(0; stop=2*pi, length=step)
+    t = range(0; stop=2 * pi, length=step)
     ellipse_x_r = a .* cos.(t)
     ellipse_y_r = b .* sin.(t)
     R = [cos(θ) sin(θ); -sin(θ) cos(θ)] .* σ
     r_ellipse = [ellipse_x_r ellipse_y_r] * R
     x = x0 .+ r_ellipse[:, 1]
     y = y0 .+ r_ellipse[:, 2]
-    map(Point2, zip(x, y))
+    return map(Point2, zip(x, y))
 end
 
 @doc raw"""
@@ -62,18 +62,15 @@ Keyword Arguments:
 - interp: upsampling method, default as `Linear()`` (using the `Interpolations.jl` package)
 - norm: flag to normalize the image value by its maximum, default as `false`
 """
-function image2dataset(
-    image::AbstractMatrix;
-    upsample=1, interp=Linear(),
-    norm = false,
-    )
-    
+function image2dataset(image::AbstractMatrix; upsample=1, interp=Linear(), norm=false)
     gridsize = size(image)
     _frm = interpolate(image, BSpline(interp), OnGrid())
-    _sample_ind = [(xi, yi) for yi in 1:(1/upsample):gridsize[2], xi in 1:(1/upsample):gridsize[1]]
+    _sample_ind = [
+        (xi, yi) for yi in 1:(1 / upsample):gridsize[2], xi in 1:(1 / upsample):gridsize[1]
+    ]
 
     _x = map(identity, _sample_ind)
-    _y = map(x->_frm[x[2], x[1]], _sample_ind)
+    _y = map(x -> _frm[x[2], x[1]], _sample_ind)
     #NOTE: # srf is organized as HxW, ie: [y, x]
 
     _y = norm ? _y ./ maximum(abs, _y) : _y
@@ -82,7 +79,7 @@ function image2dataset(
 end
 
 function gaussian_2d_param(; A, x0, y0, a, b, c, bias=0)
-    (x, y) -> begin
+    return (x, y) -> begin
         dx = x - x0
         dy = y - y0
         dd = [dx; dy]
@@ -90,29 +87,29 @@ function gaussian_2d_param(; A, x0, y0, a, b, c, bias=0)
         rot = [
             a b
             b c
-                ]
+        ]
         A * exp(-sum(rot .* (dd * dd'))) + bias
     end
 end
 
 function gaussian_2d(; A, x0, y0, θ, σx, σy, bias=0)
     (a, b, c) = gaussian_2d_param_proj(; θ, σx, σy)
-    (x, y) -> begin
-        A * exp(-(a * abs2(x - x0) + 2 * b * (x-x0) * (y-y0) + c * abs2(y - y0))) + bias
+    return (x, y) -> begin
+        A * exp(-(a * abs2(x - x0) + 2 * b * (x - x0) * (y - y0) + c * abs2(y - y0))) + bias
     end
 end
 
-gaussian_2d_param_interp(; a, b, c) = begin
-    θ = atan(2b/(a-c))/2
-    σx = 1/sqrt(2(a * cos(θ)^2 + 2b*cos(θ)sin(θ) + c * sin(θ)^2))
-    σy = 1/sqrt(2(a * sin(θ)^2 - 2b*cos(θ)sin(θ) + c * cos(θ)^2))
+function gaussian_2d_param_interp(; a, b, c)
+    θ = atan(2b / (a - c)) / 2
+    σx = 1 / sqrt(2(a * cos(θ)^2 + 2b * cos(θ)sin(θ) + c * sin(θ)^2))
+    σy = 1 / sqrt(2(a * sin(θ)^2 - 2b * cos(θ)sin(θ) + c * cos(θ)^2))
     (θ, σx, σy)
 end
 
-gaussian_2d_param_proj(; θ, σx, σy) = begin
-    a = cos(θ)^2 / (2*σx^2) + sin(θ)^2 / (2*σy^2)
-    b = - sin(θ)cos(θ) / (2*σx^2) + sin(θ)cos(θ) / (2*σy^2)
-    c = sin(θ)^2 / (2*σx^2) + cos(θ)^2 / (2*σy^2)
+function gaussian_2d_param_proj(; θ, σx, σy)
+    a = cos(θ)^2 / (2 * σx^2) + sin(θ)^2 / (2 * σy^2)
+    b = -sin(θ)cos(θ) / (2 * σx^2) + sin(θ)cos(θ) / (2 * σy^2)
+    c = sin(θ)^2 / (2 * σx^2) + cos(θ)^2 / (2 * σy^2)
     (a, b, c)
 end
 
@@ -120,7 +117,7 @@ function _loss_srf_gaussian_fit_least_square(X, Y)
     (param) -> begin
         (A, σx, σy, x0, y0, θ, bias) = length(param) == 6 ? [param; 0] : param
         _func = gaussian_2d(; A, σx, σy, x0, y0, θ, bias)
-        ŷ = map(x->_func(x...), X)
+        ŷ = map(x -> _func(x...), X)
         return sum(abs2, ŷ .- Y)
     end
 end
@@ -152,23 +149,26 @@ Keyword Arguments:
 """
 function srf_gaussian_fit(
     srf::AbstractMatrix{T};
-    upsample=1, norm =false, interp=Linear(),
+    upsample=1,
+    norm=false,
+    interp=Linear(),
     optim_algorithm=NelderMead(),
-    optim_option = OptimOptions(),
-    param_init = nothing,
-    bias = false,
-    dev = false,
-    verbose = false,
+    optim_option=OptimOptions(),
+    param_init=nothing,
+    bias=false,
+    dev=false,
+    verbose=false,
 ) where {T}
     (X, y) = image2dataset(srf; upsample, norm, interp)
 
     param_0 = if isnothing(param_init)
         _param = T[
             maximum(y), # A
-            rand()*2, rand()*2, #σa, σb
+            rand() * 2,
+            rand() * 2, #σa, σb
             mean(first.(X), weights(y)), #x0
             mean(last.(X), weights(y)), # y0
-            (rand()-0.5) * pi/2, # θ NOTE: init values within [-45deg, 45deg]
+            (rand() - 0.5) * pi / 2, # θ NOTE: init values within [-45deg, 45deg]
             # rand() # bias
         ]
         bias && push!(_param, rand(T)) # bias
@@ -179,7 +179,7 @@ function srf_gaussian_fit(
 
     _loss = _loss_srf_gaussian_fit_least_square(X, y)
     rez = optimize(_loss, param_0, optim_algorithm, optim_option)
-    
+
     verbose && (@show rez)
 
     if dev
