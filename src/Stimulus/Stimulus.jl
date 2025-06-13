@@ -1,6 +1,6 @@
 module Stimulus
 
-import Base
+using Base: Base
 
 include("sparse_noise.jl")
 include("markers.jl")
