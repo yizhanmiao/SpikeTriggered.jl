@@ -15,3 +15,6 @@ devs/
 .DS_Store
 
 docs/build/
+# pixi environments
+.pixi/*
+!.pixi/config.toml
