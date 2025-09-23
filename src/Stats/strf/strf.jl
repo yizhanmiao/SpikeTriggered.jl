@@ -1,4 +1,4 @@
-export strf_, strf_hstack
+export strf_, strf_hstack, strf_vstack
 
 const STRF{T} = Array{T,3} #[Height x Width x nTimepoints]
 const SRF{T} = Array{T,2} #[Height x Width]
@@ -18,6 +18,13 @@ end
 
 strf_hstack(x::AbstractArray{T,3}) where {T} = reduce(hcat, eachslice(x; dims=3))
 strf_hstack(x, args...; kwargs...) = strf_hstack(strf_(x, args...; kwargs...))
+
+@doc raw"""
+    strf_vstack(strfs...; kwargs...)
+
+stack multiple strfs vertically.
+"""
+strf_vstack(strfs...; kwargs...) = reduce(vcat, map(x->strf_hstack(x; kwargs...), strfs))
 
 @doc raw"""
     strf_(val, height, width) -> Array{T, 3} HxWxT
