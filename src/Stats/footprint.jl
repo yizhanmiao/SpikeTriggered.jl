@@ -76,7 +76,9 @@ inputs are zscore from standard normal distribution.
 
 `fdr_c` is the constant value for correcting Benjamini–Hochberg procedure with joint distributions among pvalues.
 """
-function get_footprint_mask(func_pval::Function, raw::AbstractArray; alpha=0.01, fdr_c=:auto)
+function get_footprint_mask(
+    func_pval::Function, raw::AbstractArray; alpha=0.01, fdr_c=:auto
+)
     pval = func_pval(raw)
     C = if fdr_c == :auto
         benjamini_hochberg_constant(length(pval))

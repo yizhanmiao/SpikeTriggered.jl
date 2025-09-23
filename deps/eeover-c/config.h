@@ -306,4 +306,3 @@
 #endif
 
 #define RETURN_IF_NULL(x) if (!x) { return ; }
-

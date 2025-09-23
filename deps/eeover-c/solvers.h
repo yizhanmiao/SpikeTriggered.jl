@@ -32,31 +32,31 @@ void CUBICROOTS (double p[], double r[][5]);
 void QUADROOTS (double p[], double r[][5]);
 //---------------------------------------------------------------------------
 
-double nointpts (double A1, double B1, double A2, double B2, double H1, 
+double nointpts (double A1, double B1, double A2, double B2, double H1,
                  double K1, double H2, double K2, double PHI_1, double PHI_2,
-                 double H2_TR, double K2_TR, double AA, double BB, 
+                 double H2_TR, double K2_TR, double AA, double BB,
                  double CC, double DD, double EE, double FF, int *rtnCode);
 
-double twointpts (double xint[], double yint[], double A1, double B1, 
-                  double PHI_1, double A2, double B2, double H2_TR, 
-                  double K2_TR, double PHI_2, double AA, double BB, 
+double twointpts (double xint[], double yint[], double A1, double B1,
+                  double PHI_1, double A2, double B2, double H2_TR,
+                  double K2_TR, double PHI_2, double AA, double BB,
                   double CC, double DD, double EE, double FF, int *rtnCode);
 
-double threeintpts (double xint[], double yint[], double A1, double B1, 
-                    double PHI_1, double A2, double B2, double H2_TR, 
-                    double K2_TR, double PHI_2, double AA, double BB, 
+double threeintpts (double xint[], double yint[], double A1, double B1,
+                    double PHI_1, double A2, double B2, double H2_TR,
+                    double K2_TR, double PHI_2, double AA, double BB,
                     double CC, double DD, double EE, double FF,
                     int *rtnCode);
 
-double fourintpts (double xint[], double yint[], double A1, double B1, 
-                   double PHI_1, double A2, double B2, double H2_TR, 
-                   double K2_TR, double PHI_2, double AA, double BB, 
+double fourintpts (double xint[], double yint[], double A1, double B1,
+                   double PHI_1, double A2, double B2, double H2_TR,
+                   double K2_TR, double PHI_2, double AA, double BB,
                    double CC, double DD, double EE, double FF, int *rtnCode);
 
 int istanpt (double x, double y, double A1, double B1, double AA, double BB,
              double CC, double DD, double EE, double FF);
 
-double ellipse2tr (double x, double y, double AA, double BB, 
+double ellipse2tr (double x, double y, double AA, double BB,
                    double CC, double DD, double EE, double FF);
 
 //===========================================================================
@@ -64,21 +64,21 @@ double ellipse2tr (double x, double y, double AA, double BB,
 //===========================================================================
 //choice=1: use gsl_poly_complex_solve()
 //choice=2: use Andrew Steiner's gsl_poly_complex_solve_quartic()
-double ellipse_ellipse_overlap_gsl(double PHI_1, double A1, double B1, 
-                                double H1, double K1, double PHI_2, 
+double ellipse_ellipse_overlap_gsl(double PHI_1, double A1, double B1,
+                                double H1, double K1, double PHI_2,
                                 double A2, double B2, double H2, double K2,
                                 double X[4], double Y[4], int * NROOTS,
                                 int *rtnCode, int choice);
 
 
-double ellipse_ellipse_overlap_netlibs(double PHI_1, double A1, double B1, 
-                                double H1, double K1, double PHI_2, 
+double ellipse_ellipse_overlap_netlibs(double PHI_1, double A1, double B1,
+                                double H1, double K1, double PHI_2,
                                 double A2, double B2, double H2, double K2,
                                 double X[4], double Y[4], int * NROOTS,
                                 int *rtnCode);
 
-double ellipse_ellipse_overlap_gems(double PHI_1, double A1, double B1, 
-                                double H1, double K1, double PHI_2, 
+double ellipse_ellipse_overlap_gems(double PHI_1, double A1, double B1,
+                                double H1, double K1, double PHI_2,
                                 double A2, double B2, double H2, double K2,
                                 double X[4], double Y[4], int * NROOTS,
                                 int *rtnCode);

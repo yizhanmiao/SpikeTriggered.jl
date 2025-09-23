@@ -1,26 +1,26 @@
 /* poly/zsolve_quartic.c
- * 
+ *
  * Copyright (C) 2003 CERN and K.S. K\"{o}lbig
  *
- * Converted from CERNLIB to C and implemented into the GSL Library 
+ * Converted from CERNLIB to C and implemented into the GSL Library
  * by Andrew W. Steiner and Andy Buckley
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
  * your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/* zsolve_quartic.c - finds the complex roots of 
+/* zsolve_quartic.c - finds the complex roots of
  *  x^4 + a x^3 + b x^2 + c x + d = 0
  */
 
@@ -154,7 +154,7 @@ gsl_poly_complex_solve_quartic (double a, double b, double c, double d,
         double CQ3 = 2916 * qcub * qcub * qcub;
 
         disc = (CR2 - CQ3) / 2125764.0;
-	
+
         if (0 == R && 0 == Q)
           {
             u[0] = -rc / 3;
@@ -186,7 +186,7 @@ gsl_poly_complex_solve_quartic (double a, double b, double c, double d,
               theta = 0.0;
 	    {
 	      double norm = -2 * sqrtQ;
-	      
+
 	      u[0] = norm * cos (theta / 3) - rc / 3;
 	      u[1] = norm * cos ((theta + 2.0 * M_PI) / 3) - rc / 3;
 	      u[2] = norm * cos ((theta - 2.0 * M_PI) / 3) - rc / 3;
@@ -208,12 +208,12 @@ gsl_poly_complex_solve_quartic (double a, double b, double c, double d,
       }
       /* End of solution to resolvent cubic */
 
-      /* Combine the square roots of the roots of the cubic 
-       * resolvent appropriately. Also, calculate 'mt' which 
+      /* Combine the square roots of the roots of the cubic
+       * resolvent appropriately. Also, calculate 'mt' which
        * designates the nature of the roots:
-       * mt=1 : 4 real roots 
-       * mt=2 : 0 real roots 
-       * mt=3 : 2 real roots 
+       * mt=1 : 4 real roots
+       * mt=2 : 0 real roots
+       * mt=3 : 2 real roots
        */
 
       if (0 == disc)
@@ -268,21 +268,21 @@ gsl_poly_complex_solve_quartic (double a, double b, double c, double d,
           w2 = gsl_complex_sqrt (w2);
         }
 
-      /* Solve the quadratic in order to obtain the roots 
+      /* Solve the quadratic in order to obtain the roots
        * to the quartic */
       if (0.0 != gsl_complex_abs (gsl_complex_mul (w1, w2))) {
-	w3 = gsl_complex_mul_real (gsl_complex_inverse 
+	w3 = gsl_complex_mul_real (gsl_complex_inverse
 				   (gsl_complex_mul (w1, w2)), -qq / 8.0);
       }
       h = r4 * a;
-      zarr[0] = gsl_complex_add_real (gsl_complex_add 
+      zarr[0] = gsl_complex_add_real (gsl_complex_add
 				      (gsl_complex_add (w1, w2), w3), -h);
-      zarr[1] = gsl_complex_add_real (gsl_complex_add 
-				      (gsl_complex_negative 
+      zarr[1] = gsl_complex_add_real (gsl_complex_add
+				      (gsl_complex_negative
 				       (gsl_complex_add (w1, w2)), w3), -h);
-      zarr[2] = gsl_complex_add_real (gsl_complex_sub 
+      zarr[2] = gsl_complex_add_real (gsl_complex_sub
 				      (gsl_complex_sub (w2, w1), w3), -h);
-      zarr[3] = gsl_complex_add_real (gsl_complex_sub 
+      zarr[3] = gsl_complex_add_real (gsl_complex_sub
 				      (gsl_complex_sub (w1, w2), w3), -h);
 
       /* Arrange the roots into the variables z0, z1, z2, z3 */
@@ -327,9 +327,9 @@ gsl_poly_complex_solve_quartic (double a, double b, double c, double d,
         }
     }
 
-  /* 
+  /*
    * Sort the roots as usual.
-   * This code is most likely not optimal. 
+   * This code is most likely not optimal.
    */
 
   if (1 == mt)
@@ -354,28 +354,28 @@ gsl_poly_complex_solve_quartic (double a, double b, double c, double d,
 
       /* If all of the real parts are equal, just sort
 	 by the imaginary parts */
-      if (GSL_REAL (*z0) == GSL_REAL (*z2)) 
+      if (GSL_REAL (*z0) == GSL_REAL (*z2))
 	{
-	
+
 	  /* Ensure that the pairs are ordered so that the
-	     root with negative imaginary part is first 
+	     root with negative imaginary part is first
 	  */
 	  if (GSL_IMAG (*z2) > GSL_IMAG (*z3)) SWAP (*z2, *z3);
 	  if (GSL_IMAG (*z0) > GSL_IMAG (*z1)) SWAP (*z0, *z1);
-	
-	  if (GSL_IMAG (*z0) < GSL_IMAG (*z2)) 
+
+	  if (GSL_IMAG (*z0) < GSL_IMAG (*z2))
 	    {
 	      SWAP (*z1, *z2);
 	      SWAP (*z2, *z3);
-	    } 
-	  else 
+	    }
+	  else
 	    {
 	      SWAP (*z0, *z2);
 	      SWAP (*z0, *z1);
 	    }
-	
-	} 
-      else 
+
+	}
+      else
 	{
 	  /* Otherwise, sort the real parts first */
 	  if (GSL_REAL (*z0) > GSL_REAL (*z2))
@@ -396,37 +396,37 @@ gsl_poly_complex_solve_quartic (double a, double b, double c, double d,
       if (GSL_IMAG (*z2) > GSL_IMAG (*z3)) SWAP (*z2, *z3);
 
       /* Sort real parts */
-      if (GSL_REAL (*z0) == GSL_REAL (*z2)) 
+      if (GSL_REAL (*z0) == GSL_REAL (*z2))
 	{
-	  if (GSL_REAL (*z0) < GSL_REAL(*z1)) 
+	  if (GSL_REAL (*z0) < GSL_REAL(*z1))
 	    {
 	      SWAP (*z1, *z3);
 	      SWAP (*z1, *z2);
 	      SWAP (*z0, *z1);
 	    }
-	  else if (GSL_REAL (*z0) == GSL_REAL (*z1)) 
+	  else if (GSL_REAL (*z0) == GSL_REAL (*z1))
 	    {
 	      SWAP (*z0,*z2);
 	    }
-	  else 
+	  else
 	    {
 	      SWAP (*z0, *z1);
 	      SWAP (*z1, *z2);
 	    }
-	} 
-      else if (GSL_REAL (*z1) == GSL_REAL (*z2)) 
+	}
+      else if (GSL_REAL (*z1) == GSL_REAL (*z2))
 	{
-	  if (GSL_REAL (*z0) < GSL_REAL(*z1)) 
+	  if (GSL_REAL (*z0) < GSL_REAL(*z1))
 	    {
 	      SWAP (*z1, *z2);
 	    }
-	  else 
+	  else
 	    {
 	      SWAP (*z0, *z3);
 	      SWAP (*z0, *z2);
 	    }
-	} 
-      else 
+	}
+      else
 	{
 	  if (GSL_REAL (*z0) > GSL_REAL (*z1)) SWAP (*z0, *z1);
 	  if (GSL_REAL (*z1) > GSL_REAL (*z2))

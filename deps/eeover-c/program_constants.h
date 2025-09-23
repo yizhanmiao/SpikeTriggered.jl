@@ -44,13 +44,3 @@
 
 
 enum boolean { GSL = 0, TOMS, GEMS, BOOST };
-
-
-
-
-
-
-
-
-
-
