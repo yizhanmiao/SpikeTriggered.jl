@@ -1,4 +1,4 @@
-export get_footprint_map, get_footprint_mask
+export get_footprint_map, get_footprint_mask, collapse_footprint
 public benjamini_hochberg_constant
 
 @doc raw"""
@@ -32,20 +32,32 @@ function get_footprint_map(
     _map = sign.(_mask .* raw)
 
     if collapse
-        #NOTE: polarity is set as the first sign of footprint
-        map(
-            x -> begin
-                _idx = findfirst(abs.(x) .> 0)
-                _idx isa Nothing ? 0 : x[_idx]
-            end,
-            eachslice(make_strf(_map; gridsize); dims=(1, 2)),
-        )
+        collapse_footprint(_map; gridsize)
     else
         _map
     end
 end
+
 function get_footprint_map(raw::AbstractArray; kwargs...)
     return get_footprint_map(zscore_pvalue, raw; kwargs...)
+end
+
+@doc raw"""
+    collapse_footprint(fp; kwargs...)
+
+convert spatiotemporal footprint into spatial footprint,
+polarity is set as the first sign of footprint.
+
+"""
+function collapse_footprint(fp; kwargs...)
+    map(
+        #NOTE: polarity is set as the first sign of footprint
+        x -> begin
+            _idx = findfirst(abs.(x) .> 0)
+            _idx isa Nothing ? 0 : x[_idx]
+        end,
+        eachslice(strf_(fp; kwargs...); dims=(1, 2)),
+    )
 end
 
 @doc raw"""
