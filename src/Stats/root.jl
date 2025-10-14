@@ -12,7 +12,8 @@ using FLoops: @floop
 using FHist: Hist1D, bincounts
 using ToeplitzMatrices: Circulant
 using GeometryBasics: Point2
-using Optim: optimize, NelderMead, Options as OptimOptions
+using Optim: optimize, NelderMead, Options as OptimOptions, minimizer
+using Interpolations: interpolate, BSpline, Linear, OnGrid
 
 const SpikeRaster{T} = Vector{Vector{T}}
 const AbstractSpikeTrain{T} = AbstractVector{T}
