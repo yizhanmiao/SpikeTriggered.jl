@@ -1,7 +1,8 @@
-export get_footprint_map, get_footprint_mask, benjamini_hochberg_constant
+export get_footprint_map, get_footprint_mask, collapse_footprint
+public benjamini_hochberg_constant
 
 @doc raw"""
-    get_footprint_map([func_pval,] raw::AbstractArray; alpha=0.01, fdr_c=1, collapse=false, gridsize=nothing)
+    get_footprint_map([func_pval,] raw::AbstractArray; alpha=0.01, fdr_c=:auto, collapse=false, gridsize=nothing)
 
 Create a footprint map based on the q-values from `func_pval(raw)`
 using Benjamini–Hochberg procedure; `alpha` as the threshold, fdr_c as the constant.
@@ -12,7 +13,7 @@ P_k \leq \frac{k}{N \cdot C} \alpha
 
 For arbiturary join distribution of p-values,
 one could set `fdr_c` as `ln(N)+1/N+γ (Euler constant)`.
-(using `benjamini_hochberg_constant(N)`)
+(using `benjamini_hochberg_constant(N)`) (default)
 
 If `collapse` is `true` and `gridsize` is specified, a 2d time-collapsed
 footprint map will be returned.
@@ -31,20 +32,32 @@ function get_footprint_map(
     _map = sign.(_mask .* raw)
 
     if collapse
-        #NOTE: polarity is set as the first sign of footprint
-        map(
-            x -> begin
-                _idx = findfirst(abs.(x) .> 0)
-                _idx isa Nothing ? 0 : x[_idx]
-            end,
-            eachslice(make_strf(_map; gridsize); dims=(1, 2)),
-        )
+        collapse_footprint(_map; gridsize)
     else
         _map
     end
 end
+
 function get_footprint_map(raw::AbstractArray; kwargs...)
     return get_footprint_map(zscore_pvalue, raw; kwargs...)
+end
+
+@doc raw"""
+    collapse_footprint(fp; kwargs...)
+
+convert spatiotemporal footprint into spatial footprint,
+polarity is set as the first sign of footprint.
+
+"""
+function collapse_footprint(fp; kwargs...)
+    map(
+        #NOTE: polarity is set as the first sign of footprint
+        x -> begin
+            _idx = findfirst(abs.(x) .> 0)
+            _idx isa Nothing ? 0 : x[_idx]
+        end,
+        eachslice(strf_(fp; kwargs...); dims=(1, 2)),
+    )
 end
 
 @doc raw"""
@@ -63,9 +76,16 @@ inputs are zscore from standard normal distribution.
 
 `fdr_c` is the constant value for correcting Benjamini–Hochberg procedure with joint distributions among pvalues.
 """
-function get_footprint_mask(func_pval::Function, raw::AbstractArray; alpha=0.01, fdr_c=1)
+function get_footprint_mask(
+    func_pval::Function, raw::AbstractArray; alpha=0.01, fdr_c=:auto
+)
     pval = func_pval(raw)
-    qval, qk = benjamini_hochberg_qvalue(pval; C=fdr_c)
+    C = if fdr_c == :auto
+        benjamini_hochberg_constant(length(pval))
+    else
+        fdr_c
+    end
+    qval, qk = benjamini_hochberg_qvalue(pval; C)
     return get_footprint_mask_from_qvalue(qval, invperm(qk[:]); alpha) #NOTE: invperm only takes a vector.
 end
 

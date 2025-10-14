@@ -76,8 +76,8 @@ end
 ## STA bootstrapping
 
 function spike_triggered_average_bootstrap(
-    stimulus::AbstractStimulus{T}, psth::AbstractPSTH; n::Integer=10, bootstrap=0
-) where {T}
+    stimulus::AbstractStimulus, psth::AbstractPSTH; n::Integer=10, bootstrap=0
+)
     @warn "please use bootstrapping with spike times for final analysis."
 
     (D, N) = size(stimulus)
@@ -87,7 +87,7 @@ function spike_triggered_average_bootstrap(
         randperm(N-n)[1:min(N, bootstrap)] .+ n
     end
 
-    bsta = Matrix{T}(undef, D*n, length(_bootstrap_offset))
+    bsta = Matrix{Float64}(undef, D*n, length(_bootstrap_offset))
     @floop for (idx, offset) in enumerate(_bootstrap_offset)
         @inbounds bsta[:, idx] .= spike_triggered_average(
             stimulus, circshift(psth, -offset); n
@@ -97,13 +97,13 @@ function spike_triggered_average_bootstrap(
 end
 
 function spike_triggered_average_bootstrap(
-    stimulus::AbstractMatrix{T},
+    stimulus::AbstractMatrix,
     spike_train::AbstractSpikeTrain,
     marker::AbstractMarker;
     n::Integer=10,
     bootstrap=1000,
     skip_n=false,
-) where {T}
+)
     (D, _N) = size(stimulus)
     @assert bootstrap > 0 "bootstrap must be positive value"
 
@@ -115,7 +115,7 @@ function spike_triggered_average_bootstrap(
         rand(bootstrap) .* _duration
     end
 
-    bsta = Matrix{T}(undef, D*n, bootstrap)
+    bsta = Matrix{Float64}(undef, D*n, bootstrap)
     @floop for (idx, offset) in enumerate(_t_shift)
         @inbounds bsta[:, idx] .= spike_triggered_average(
             stimulus, ((spike_train .+ offset) .% _duration .+ marker[1]), marker; n

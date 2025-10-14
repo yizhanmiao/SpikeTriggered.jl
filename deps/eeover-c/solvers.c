@@ -1,28 +1,28 @@
 #define DEBUG 0
 
 /* poly/solve_quartic.c
- * 
+ *
  * Copyright (C) 2003 CERN and K.S. K\"{o}lbig
  *
- * Converted to C and implemented into the GSL Library 
+ * Converted to C and implemented into the GSL Library
  * by Andrew W. Steiner and Andy Buckley
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
  * your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/* solve_quartic.c - finds the real roots of 
+/* solve_quartic.c - finds the real roots of
  *  x^4 + a x^3 + b x^2 + c x + d = 0
  */
 
@@ -44,7 +44,7 @@ int
 gsl_poly_solve_quartic (double a, double b, double c, double d,
                         double *x0, double *x1, double *x2, double *x3)
 {
-  /* 
+  /*
    * This code is based on a simplification of
    * the algorithm from zsolve_quartic.c for real roots
    */
@@ -103,7 +103,7 @@ gsl_poly_solve_quartic (double a, double b, double c, double d,
 	mt=1;
       }
     }
-  else 
+  else
     {
       /* For non-degenerate solutions, proceed by constructing and
        * solving the resolvent cubic */
@@ -168,7 +168,7 @@ gsl_poly_solve_quartic (double a, double b, double c, double d,
 	    if (R / sqrtQ3 >= 1.0) theta = 0.0;
 	    {
 	      double norm = -2 * sqrtQ;
-	  
+
 	      u[0] = norm * cos (theta / 3) - rc / 3;
 	      u[1] = norm * cos ((theta + 2.0 * M_PI) / 3) - rc / 3;
 	      u[2] = norm * cos ((theta - 2.0 * M_PI) / 3) - rc / 3;
@@ -190,26 +190,26 @@ gsl_poly_solve_quartic (double a, double b, double c, double d,
       }
       /* End of solution to resolvent cubic */
 
-      /* Combine the square roots of the roots of the cubic 
-       * resolvent appropriately. Also, calculate 'mt' which 
+      /* Combine the square roots of the roots of the cubic
+       * resolvent appropriately. Also, calculate 'mt' which
        * designates the nature of the roots:
        * mt=1 : 4 real roots (disc == 0)
        * mt=2 : 0 real roots (disc < 0)
        * mt=3 : 2 real roots (disc > 0)
        */
 
-      if (0.0 == disc) 
+      if (0.0 == disc)
 	u[2] = u[1];
 
       if (0 >= disc)
 	{
-	  mt = 2; 
+	  mt = 2;
 
 	  /* One would think that we could return 0 here and exit,
 	   * since mt=2. However, this assignment is temporary and
-	   * changes to mt=1 under certain conditions below.  
+	   * changes to mt=1 under certain conditions below.
 	   */
-	  
+
 	  v[0] = fabs (u[0]);
 	  v[1] = fabs (u[1]);
 	  v[2] = fabs (u[2]);
@@ -245,23 +245,23 @@ gsl_poly_solve_quartic (double a, double b, double c, double d,
 	    {
 	      k2 = 2;
 	    }
-	  
-	  if (0.0 <= u[k1]) 
+
+	  if (0.0 <= u[k1])
 	    {
 	      w1r=sqrt(u[k1]);
 	      w1i=0.0;
-	    } 
-	  else 
+	    }
+	  else
 	    {
 	      w1r=0.0;
 	      w1i=sqrt(-u[k1]);
 	    }
-	  if (0.0 <= u[k2]) 
+	  if (0.0 <= u[k2])
 	    {
 	      w2r=sqrt(u[k2]);
 	      w2i=0.0;
-	    } 
-	  else 
+	    }
+	  else
 	    {
 	      w2r=0.0;
 	      w2i=sqrt(-u[k2]);
@@ -271,24 +271,24 @@ gsl_poly_solve_quartic (double a, double b, double c, double d,
 	{
 	  mt = 3;
 
-	  if (0.0 == u[1] && 0.0 == u[2]) 
+	  if (0.0 == u[1] && 0.0 == u[2])
 	    {
 	      arg = 0.0;
-	    } 
-	  else 
+	    }
+	  else
 	    {
 	      arg = sqrt(sqrt(u[1] * u[1] + u[2] * u[2]));
 	    }
 	  theta = atan2(u[2], u[1]);
-	  
+
 	  w1r = arg * cos(theta / 2.0);
 	  w1i = arg * sin(theta / 2.0);
 	  w2r = w1r;
 	  w2i = -w1i;
 	}
-  
+
       /* Solve the quadratic to obtain the roots to the quartic */
-      w3r = qq / 8.0 * (w1i * w2i - w1r * w2r) / 
+      w3r = qq / 8.0 * (w1i * w2i - w1r * w2r) /
 	(w1i * w1i + w1r * w1r) / (w2i * w2i + w2r * w2r);
       h = a / 4.0;
 
@@ -296,7 +296,7 @@ gsl_poly_solve_quartic (double a, double b, double c, double d,
       zarr[1] = -w1r - w2r + w3r - h;
       zarr[2] = -w1r + w2r - w3r - h;
       zarr[3] = w1r - w2r - w3r - h;
-      
+
       /* Arrange the roots into the variables z0, z1, z2, z3 */
       if (2 == mt)
         {
@@ -313,13 +313,13 @@ gsl_poly_solve_quartic (double a, double b, double c, double d,
 	      return 0;
 	    }
 	}
-      else 
+      else
         {
 	  *x0 = zarr[0];
 	  *x1 = zarr[1];
         }
     }
-  
+
   /* Sort the roots as usual */
   if (1 == mt)
     {
@@ -351,12 +351,12 @@ gsl_poly_solve_quartic (double a, double b, double c, double d,
   return 2;
 }
 // =====================================================================================
-// ===================================================================================== 
+// =====================================================================================
 // =====================================================================================
 
 
-double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1, 
-                                double H1, double K1, double PHI_2, 
+double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
+                                double H1, double K1, double PHI_2,
                                 double A2, double B2, double H2, double K2,
                                 double X[4], double Y[4], int * NROOTS,
                                     int *rtnCode, int choice)
@@ -389,12 +389,12 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
           return -1.0;
      }
      if ( (fabs (PHI_1) > (pi)) ){
-          PHI_1 = fmod (PHI_1, pi);		
+          PHI_1 = fmod (PHI_1, pi);
      }
      if ( (fabs (PHI_2) > (pi)) ){
-          PHI_2 = fmod (PHI_2, pi);	
+          PHI_2 = fmod (PHI_2, pi);
      }
-     
+
      //=======================================================================
      //== DETERMINE THE TWO ELLIPSE EQUATIONS FROM INPUT PARAMETERS ==========
      //=======================================================================
@@ -406,18 +406,18 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
 
      //-- Working with the translated+rotated ellipses simplifies the
      //-- calculations.  The ellipses are translated then rotated so that the
-     //-- first ellipse is centered at the origin and oriented with the 
-     //-- coordinate axes.  Then, the first ellipse will have the implicit 
+     //-- first ellipse is centered at the origin and oriented with the
+     //-- coordinate axes.  Then, the first ellipse will have the implicit
      //-- (polynomial) form of
      //--   x^2/A1^2 + y+2/B1^2 = 1
-	
+
      //-- For the second ellipse, the center is first translated by the amount
-     //-- required to put the first ellipse at the origin, e.g., by (-H1, -K1)  
+     //-- required to put the first ellipse at the origin, e.g., by (-H1, -K1)
      //-- Then, the center of the second ellipse is rotated by the amount
      //-- required to orient the first ellipse with the coordinate axes, e.g.,
      //-- through the angle -PHI_1.
      //-- The translated and rotated center point coordinates for the second
-     //-- ellipse are found with the rotation matrix, derivations are 
+     //-- ellipse are found with the rotation matrix, derivations are
      //-- described in the reference.
      cosphi = cos (PHI_1);
      sinphi = sin (PHI_1);
@@ -426,7 +426,7 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
      PHI_2R = PHI_2 - PHI_1;
      if ( (fabs (PHI_2R) > (twopi)) )
           PHI_2R = fmod (PHI_2R, twopi);
-		
+
 #if DEBUG
      printf("H2_TR=%f, K2_TR=%f, PHI_2R=%f\n", H2_TR, K2_TR, PHI_2R);
 #endif
@@ -434,7 +434,7 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
      //-- in its translated-by (-H1, -H2) and rotated-by -PHI_1 postion
      //--       AA*x^2 + BB*x*y + CC*y^2 + DD*x + EE*y + FF = 0
      //-- Formulas derived in the reference
-     //-- To speed things up, store multiply-used expressions first 
+     //-- To speed things up, store multiply-used expressions first
      cosphi = cos (PHI_2R);
      cosphi2 = cosphi*cosphi;
      sinphi = sin (PHI_2R);
@@ -453,7 +453,7 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
      CC = sinphi2/A22 + cosphi2/B22;
      DD = -2.0*cosphi*tmp0 - 2.0*sinphi*tmp1;
      EE = -2.0*sinphi*tmp0 + 2.0*cosphi*tmp1;
-     FF = tmp2*tmp2/A22 + tmp3*tmp3/B22 - 1.0;  
+     FF = tmp2*tmp2/A22 + tmp3*tmp3/B22 - 1.0;
      //=======================================================================
      //== CREATE AND SOLVE THE QUARTIC EQUATION TO FIND INTERSECTION POINTS ==
      //=======================================================================
@@ -467,26 +467,26 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
      cy[4] = A1*A1*A1*A1  *AA*AA + B1*B1*(A1*A1*(BB*BB - 2.0*AA*CC)
           + B1*B1*CC*CC);
      cy[3] = 2.0*B1*(B1*B1*CC*EE + A1*A1*(BB*DD - AA*EE));
-     cy[2] = A1*A1*((B1*B1*(2.0*AA*CC - BB*BB) + DD*DD  - 2.0*AA*FF) 
+     cy[2] = A1*A1*((B1*B1*(2.0*AA*CC - BB*BB) + DD*DD  - 2.0*AA*FF)
           - 2.0*A1*A1*AA*AA) + B1*B1*(2.0*CC*FF + EE*EE);
      cy[1] = 2.0*B1*(A1*A1*(AA*EE - BB*DD) + EE*FF);
      cy[0] = (A1*(A1*AA - DD) + FF)*(A1*(A1*AA + DD) + FF);
 
      //-- Once the coefficients for the Quartic Equation in y are known, the
-     //-- roots of the quartic polynomial will represent y-values of the 
+     //-- roots of the quartic polynomial will represent y-values of the
      //-- intersection points of the two ellipse curves.
-     //-- The quartic sometimes degenerates into a polynomial of lesser 
+     //-- The quartic sometimes degenerates into a polynomial of lesser
      //-- degree, so handle all possible cases.
 #if DEBUG
      for(i=0; i<5; i++)
           printf("cy[%d]=%f\n",i, cy[i]);
-#endif	
+#endif
      if (fabs (cy[4]) > EPS){
           //== QUARTIC COEFFICIENT NONZERO, USE QUARTIC FORMULA ===============
           for (i = 0; i <= 3; i++)
                py[4-i] = cy[i]/cy[4];
           py[0] = 1.0;
-            
+
 #if DEBUG
           for(i=0; i<5; i++)
                printf("py[%d]=%f\n",i, py[i]);
@@ -501,22 +501,22 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
               nroots=4;
           }
           else if(choice==2){
-               /* zsolve_quartic.c - finds the complex roots of 
-           *  x^4 + a x^3 + b x^2 + c x + d = 0*/             
+               /* zsolve_quartic.c - finds the complex roots of
+           *  x^4 + a x^3 + b x^2 + c x + d = 0*/
                nroots = gsl_poly_complex_solve_quartic (py[1], py[2], py[3], py[4], &zz[0], &zz[1], &zz[2], &zz[3]);
           }
 
-       
+
 #if DEBUG
           printf("nroots=%d\n", nroots);
 #endif
           for (i = 0; i < 4; i++){
                if(choice==1){
-                    r[1][i+1] = REAL(z,i); 
+                    r[1][i+1] = REAL(z,i);
                     r[2][i+1] = IMAG(z,i);
                }
                else if(choice==2) {
-                    r[1][i+1] = GSL_REAL(zz[i]); 
+                    r[1][i+1] = GSL_REAL(zz[i]);
                     r[2][i+1] = GSL_IMAG(zz[i]);
                }
 #if DEBUG
@@ -542,12 +542,12 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
           //#####################################################################################
           /* nroots = 4; */
      }
-     else if (fabs (cy[3]) > EPS){ 
+     else if (fabs (cy[3]) > EPS){
           //== QUARTIC DEGENERATES TO CUBIC, USE CUBIC FORMULA ================
           for (i = 0; i <= 2; i++)
                py[3-i] = cy[i]/cy[3];
           py[0] = 1.0;
-		
+
           //CUBICROOTS (py, r);
           //#####################################################################################
           gsl_complex Z0, Z1, Z2;
@@ -561,22 +561,22 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
           //#####################################################################################
      }
      else if (fabs (cy[2]) > EPS){
-		
+
           //== QUARTIC DEGENERATES TO QUADRATIC, USE QUADRATIC FORMULA ========
           for (i = 0; i <= 1; i++)
                py[2-i] = cy[i]/cy[2];
           py[0] = 1.0;
-          
+
           /* QUADROOTS (py, r); */
           /* nroots = 2; */
           //#####################################################################################
-          //nroots = gsl_poly_solve_quadratic(py[0], py[1], py[2], &x0, &x1); 
+          //nroots = gsl_poly_solve_quadratic(py[0], py[1], py[2], &x0, &x1);
 #if DEBUG
           double x0, x1;
-          int tmp = gsl_poly_solve_quadratic(py[0], py[1], py[2], &x0, &x1); 
+          int tmp = gsl_poly_solve_quadratic(py[0], py[1], py[2], &x0, &x1);
           printf ("tmp =%d, x0=%f, x1=%f\n",tmp, x0, x1);
-          //tmp = gsl_poly_solve_quadratic(cy[0], cy[1], cy[2], &x0, &x1); 
-          //printf ("tmp2 =%d, x0=%f, x1=%f\n",tmp, x0, x1);        
+          //tmp = gsl_poly_solve_quadratic(cy[0], cy[1], cy[2], &x0, &x1);
+          //printf ("tmp2 =%d, x0=%f, x1=%f\n",tmp, x0, x1);
 #endif
           gsl_complex z0, z1;
           nroots = gsl_poly_complex_solve_quadratic (py[0], py[1], py[2], &z0, &z1);
@@ -586,8 +586,8 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
           r[2][2] = GSL_IMAG(z1);
 
           //#####################################################################################
-          
-     } 
+
+     }
      else  if (fabs (cy[1]) > EPS){
           //== QUARTIC DEGENERATES TO LINEAR: SOLVE DIRECTLY ==================
           //-- cy[1]*Y + cy[0] = 0
@@ -612,7 +612,7 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
 #endif
      nychk = 0;
      int j, duplicate=0;
-     for (i = 1; i <= nroots; i++){ 
+     for (i = 1; i <= nroots; i++){
          /* for (i = nroots; i >= 1; i--){ */
           duplicate = 0;
           if (fabs (r[2][i]) < EPS){
@@ -624,18 +624,18 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
                          duplicate=1;
                }
 //-----------------------------------
-               
+
                if(!duplicate){
                     nychk++;
 #if DEBUG
                     printf ("nychk = %d duplicate=%d\n",nychk, duplicate);
-#endif    
+#endif
                     ychk[ nychk - 1 ] = r[1][i]*B1;
 #if DEBUG
                     printf("ROOT is Real,  i=%d --> %f (B1=%f), ychk[%d]=%f\n",i,r[1][i],B1, nychk-1, ychk[ nychk - 1 ]);
 #endif
                }// duplicate
-          } //if fabs() 
+          } //if fabs()
 
 
      }// for i
@@ -699,7 +699,7 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
 #if DEBUG
           printf("\tx1=%f, y1=%f, A=%f. B=%f ---> ellipse2tr(x1)= %f\n",x1, ychk[i], A1, B1, ellipse2tr(x1, ychk[i], AA, BB, CC, DD, EE, FF) );
           printf("\tx2=%f, y1=%f, A=%f. B=%f ---> ellipse2tr(x2) %f\n",x2, ychk[i], A1, B1, ellipse2tr(x2, ychk[i], AA, BB, CC, DD, EE, FF) );
-#endif		
+#endif
           if (fabs(ellipse2tr(x1, ychk[i], AA, BB, CC, DD, EE, FF)) < EPS){
                nintpts++;
 #if DEBUG
@@ -718,7 +718,7 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
           }
           // 6.1.2015. sometimes x1 is _nearly_ 0. That makes -x2 automatically to an interpt.
           if (fabs(x2-x1)>0.001 && (fabs(ellipse2tr(x2, ychk[i], AA, BB, CC, DD, EE, FF)) < EPS)
-                    && (fabs (x2 - x1) > EPS)){				
+                    && (fabs (x2 - x1) > EPS)){
                nintpts++;
 #if DEBUG
                printf("Intersection point. first if x2. nintps=%d, Dx=%f (eps2=%f) \n",nintpts, fabs (x2 - x1), EPS);
@@ -746,31 +746,31 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
      switch (nintpts){
           case 0:
           case 1:
-               OverlapArea = nointpts (A1, B1, A2, B2, H1, K1, H2, K2, PHI_1, 
-                    PHI_2, H2_TR, K2_TR, AA,BB, CC, DD, EE, 
+               OverlapArea = nointpts (A1, B1, A2, B2, H1, K1, H2, K2, PHI_1,
+                    PHI_2, H2_TR, K2_TR, AA,BB, CC, DD, EE,
                     FF, rtnCode);
                /* free (ychk); */
                /* free(xint); */
                /* free(yint); */
                return OverlapArea;
-			
+
           case 2:
                //-- when there are two intersection points, it is possible for
                //-- them to both be tangents, in which case one of the ellipses
                //-- is fully contained within the other.  Check the points for
                //-- tangents; if one of the points is a tangent, then the other
-               //-- must be as well, otherwise there would be more than 2 
+               //-- must be as well, otherwise there would be more than 2
                //-- intersection points.
-               fnRtnCode = istanpt (xint[0], yint[0], A1, B1, AA, BB, CC, DD, 
+               fnRtnCode = istanpt (xint[0], yint[0], A1, B1, AA, BB, CC, DD,
                     EE, FF);
 
-			
+
                if (fnRtnCode == TANGENT_POINT){
 #if DEBUG
                     printf("one point is tangent\n");
 #endif
-                    OverlapArea = nointpts (A1, B1, A2, B2, H1, K1, H2, K2,  
-                                       PHI_1, PHI_2, H2_TR, K2_TR, AA,BB, CC,  
+                    OverlapArea = nointpts (A1, B1, A2, B2, H1, K1, H2, K2,
+                                       PHI_1, PHI_2, H2_TR, K2_TR, AA,BB, CC,
                                        DD, EE, FF, rtnCode);
 
                }
@@ -783,42 +783,42 @@ double ellipse_ellipse_overlap_gsl (double PHI_1, double A1, double B1,
 #endif
                }
                return OverlapArea;
-			
+
                case 3:
                     //-- when there are three intersection points, one and only one
                     //-- of the points must be a tangent point.
                     OverlapArea = threeintpts (xint, yint,  A1, B1, PHI_1, A2, B2,
-                         H2_TR, K2_TR, PHI_2, AA, BB, CC, DD, 
+                         H2_TR, K2_TR, PHI_2, AA, BB, CC, DD,
                          EE, FF, rtnCode);
                     return OverlapArea;
-			
+
                case 4:
                     //-- four intersections points has only one case.
                     OverlapArea = fourintpts (xint, yint,  A1, B1, PHI_1, A2, B2,
-                         H2_TR, K2_TR, PHI_2, AA, BB, CC, DD, 
+                         H2_TR, K2_TR, PHI_2, AA, BB, CC, DD,
                          EE, FF, rtnCode);
                     return OverlapArea;
-		
+
                default:
                     //-- should never get here (but get compiler warning for missing
                     //-- return value if this line is omitted)
                     (*rtnCode) = ERROR_INTERSECTION_PTS;
-			
+
                     return -1.0;
      } //switch
 }
 
 
 
-double ellipse2tr (double x, double y, double AA, double BB, 
+double ellipse2tr (double x, double y, double AA, double BB,
                    double CC, double DD, double EE, double FF)
 {
      return (AA*x*x + BB*x*y + CC*y*y + DD*x + EE*y + FF);
 }
 
-double nointpts (double A1, double B1, double A2, double B2, double H1, 
+double nointpts (double A1, double B1, double A2, double B2, double H1,
                  double K1, double H2, double K2, double PHI_1, double PHI_2,
-                 double H2_TR, double K2_TR, double AA, double BB, 
+                 double H2_TR, double K2_TR, double AA, double BB,
                  double CC, double DD, double EE, double FF, int *rtnCode)
 {
      //some tmp-variables to avoid doing things several times.
@@ -827,15 +827,15 @@ double nointpts (double A1, double B1, double A2, double B2, double H1,
      double Area_1 = pi*A1B1;
      double Area_2 = pi*A2B2;
      //-- The relative size of the two ellipses can be found from the axis
-     //-- lengths 
-     double relsize = A1B1 - A2B2; 
+     //-- lengths
+     double relsize = A1B1 - A2B2;
      if (relsize > 0.0)
      {
           //-- First Ellipse is larger than second ellipse.
           //-- If second ellipse center (H2_TR, K2_TR) is inside
-          //-- first ellipse, then ellipse 2 is completely inside 
+          //-- first ellipse, then ellipse 2 is completely inside
           //-- ellipse 1. Otherwise, the ellipses are disjoint.
-          if ( ((H2_TR*H2_TR) / (A1*A1) 
+          if ( ((H2_TR*H2_TR) / (A1*A1)
                 + (K2_TR*K2_TR) / (B1*B1)) < 1.0 )
           {
                (*rtnCode) = ELLIPSE2_INSIDE_ELLIPSE1;
@@ -875,7 +875,7 @@ double nointpts (double A1, double B1, double A2, double B2, double H1,
           if( (fabs (H1 - H2) < EPS) && (fabs (K1 - K2) < EPS) && (fabs (Area_1 - Area_2) < EPS))
           {
                (*rtnCode) = ELLIPSES_ARE_IDENTICAL;
-               return Area_1; 
+               return Area_1;
           }
           else
           {
@@ -887,9 +887,9 @@ double nointpts (double A1, double B1, double A2, double B2, double H1,
 }
 
 //-- two distinct intersection points (x1, y1) and (x2, y2) find overlap area
-double twointpts (double x[], double y[], double A1, double B1, double PHI_1, 
-                  double A2, double B2, double H2_TR, double K2_TR, 
-                  double PHI_2, double AA, double BB, double CC, double DD, 
+double twointpts (double x[], double y[], double A1, double B1, double PHI_1,
+                  double A2, double B2, double H2_TR, double K2_TR,
+                  double PHI_2, double AA, double BB, double CC, double DD,
                   double EE, double FF, int *rtnCode)
 {
      double area1, area2;
@@ -902,7 +902,7 @@ double twointpts (double x[], double y[], double A1, double B1, double PHI_1,
 
      //-- if execution arrives here, the intersection points are not
      //-- tangents.
-	
+
      //-- determine which direction to integrate in the ellipse_segment
      //-- routine for each ellipse.
 
@@ -911,14 +911,14 @@ double twointpts (double x[], double y[], double A1, double B1, double PHI_1,
           x[0] = (x[0] < 0) ? -A1 : A1;
      if (y[0] < 0.0) 	 //-- Quadrant III or IV
           theta1 = twopi - acos (x[0] / A1);
-     else             //-- Quadrant I or II      
+     else             //-- Quadrant I or II
           theta1 = acos (x[0] / A1);
-		
+
      if (fabs (x[1]) > A1)
           x[1] = (x[1] < 0) ? -A1 : A1;
      if (y[1] < 0.0) 	 //-- Quadrant III or IV
           theta2 = twopi - acos (x[1] / A1);
-     else             //-- Quadrant I or II      
+     else             //-- Quadrant I or II
           theta2 = acos (x[1] / A1);
 
      //-- logic is for proceeding counterclockwise from theta1 to theta2
@@ -931,15 +931,15 @@ double twointpts (double x[], double y[], double A1, double B1, double PHI_1,
 
      //-- find a point on the first ellipse that is different than the two
      //-- intersection points.
-     xmid = A1*cos ((theta1 + theta2)/2.0);	
-     ymid = B1*sin ((theta1 + theta2)/2.0);	
-	
+     xmid = A1*cos ((theta1 + theta2)/2.0);
+     ymid = B1*sin ((theta1 + theta2)/2.0);
+
      //-- the point (xmid, ymid) is on the first ellipse 'between' the two
-     //-- intersection points (x[1], y[1]) and (x[2], y[2]) when travelling 
+     //-- intersection points (x[1], y[1]) and (x[2], y[2]) when travelling
      //-- counter- clockwise from (x[1], y[1]) to (x[2], y[2]).  If the point
      //-- (xmid, ymid) is inside the second ellipse, then the desired segment
-     //-- of ellipse 1 contains the point (xmid, ymid), so integrate 
-     //-- counterclockwise from (x[1], y[1]) to (x[2], y[2]).  Otherwise, 
+     //-- of ellipse 1 contains the point (xmid, ymid), so integrate
+     //-- counterclockwise from (x[1], y[1]) to (x[2], y[2]).  Otherwise,
      //-- integrate counterclockwise from (x[2], y[2]) to (x[1], y[1])
      if (ellipse2tr (xmid, ymid, AA, BB, CC, DD, EE, FF) > 0.0)
      {
@@ -957,9 +957,9 @@ double twointpts (double x[], double y[], double A1, double B1, double PHI_1,
           trsign = -1.0;
 
 
-     area1 = 0.5*(A1*B1*(theta2 - theta1) 
-                  + trsign*fabs (x[0]*y[1] - x[1]*y[0]));	
-	
+     area1 = 0.5*(A1*B1*(theta2 - theta1)
+                  + trsign*fabs (x[0]*y[1] - x[1]*y[0]));
+
      if (area1 < 0)
      {
           printf("TWO area1=%f\n",area1);
@@ -980,7 +980,7 @@ double twointpts (double x[], double y[], double A1, double B1, double PHI_1,
      y1_tr = (x[0] - H2_TR)*sinphi + (y[0] - K2_TR)*cosphi;
      x2_tr = (x[1] - H2_TR)*cosphi + (y[1] - K2_TR)*-sinphi;
      y2_tr = (x[1] - H2_TR)*sinphi + (y[1] - K2_TR)*cosphi;
-	
+
      //-- determine which branch of the ellipse to integrate by finding a
      //-- point on the second ellipse, and asking whether it is inside the
      //-- first ellipse (in their once-translated+rotated positions)
@@ -989,14 +989,14 @@ double twointpts (double x[], double y[], double A1, double B1, double PHI_1,
           x1_tr = (x1_tr < 0) ? -A2 : A2;
      if (y1_tr < 0.0) 	 //-- Quadrant III or IV
           theta1 = twopi - acos (x1_tr/A2);
-     else             //-- Quadrant I or II      
+     else             //-- Quadrant I or II
           theta1 = acos (x1_tr/A2);
-		
+
      if (fabs (x2_tr) > A2)
           x2_tr = (x2_tr < 0) ? -A2 : A2;
      if (y2_tr < 0.0) 	 //-- Quadrant III or IV
           theta2 = twopi - acos (x2_tr/A2);
-     else             //-- Quadrant I or II      
+     else             //-- Quadrant I or II
           theta2 = acos (x2_tr/A2);
 
      //-- logic is for proceeding counterclockwise from theta1 to theta2
@@ -1009,9 +1009,9 @@ double twointpts (double x[], double y[], double A1, double B1, double PHI_1,
 
      //-- find a point on the second ellipse that is different than the two
      //-- intersection points.
-     xmid = A2*cos ((theta1 + theta2)/2.0);	
+     xmid = A2*cos ((theta1 + theta2)/2.0);
      ymid = B2*sin ((theta1 + theta2)/2.0);
-	
+
      //-- translate the point back to the second ellipse in its once-
      //-- translated+rotated position
      cosphi = cos (PHI_2 - PHI_1);
@@ -1022,10 +1022,10 @@ double twointpts (double x[], double y[], double A1, double B1, double PHI_1,
      //-- the point (xmid_rt, ymid_rt) is on the second ellipse 'between' the
      //-- intersection points (x[1], y[1]) and (x[2], y[2]) when travelling
      //-- counterclockwise from (x[1], y[1]) to (x[2], y[2]).  If the point
-     //-- (xmid_rt, ymid_rt) is inside the first ellipse, then the desired 
-     //-- segment of ellipse 2 contains the point (xmid_rt, ymid_rt), so 
-     //-- integrate counterclockwise from (x[1], y[1]) to (x[2], y[2]).  
-     //-- Otherwise, integrate counterclockwise from (x[2], y[2]) to 
+     //-- (xmid_rt, ymid_rt) is inside the first ellipse, then the desired
+     //-- segment of ellipse 2 contains the point (xmid_rt, ymid_rt), so
+     //-- integrate counterclockwise from (x[1], y[1]) to (x[2], y[2]).
+     //-- Otherwise, integrate counterclockwise from (x[2], y[2]) to
      //-- (x[1], y[1])
      if (((xmid_rt*xmid_rt)/(A1*A1) + (ymid_rt*ymid_rt)/(B1*B1)) > 1.0)
      {
@@ -1041,18 +1041,18 @@ double twointpts (double x[], double y[], double A1, double B1, double PHI_1,
           trsign = 1.0;
      else
           trsign = -1.0;
-     area2 = 0.5*(A2*B2*(theta2 - theta1) 
-                  + trsign*fabs (x1_tr*y2_tr - x2_tr*y1_tr));	
-	
+     area2 = 0.5*(A2*B2*(theta2 - theta1)
+                  + trsign*fabs (x1_tr*y2_tr - x2_tr*y1_tr));
+
      if (area2 < 0)
      {
 #if DEBUG
           printf("TWO area2=%f\n",area2);
 #endif
           area2 += A2*B2;
-          
+
      }
-	
+
      (*rtnCode) = TWO_INTERSECTION_POINTS;
 #if DEBUG
      printf("Twointpts: \t area1 =%f,  area2=%f\n",area1, area2);
@@ -1062,9 +1062,9 @@ double twointpts (double x[], double y[], double A1, double B1, double PHI_1,
 
 //-- three distinct intersection points, must have two intersections
 //-- and one tangent, which is the only possibility
-double threeintpts (double xint[], double yint[], double A1, double B1, 
-                    double PHI_1, double A2, double B2, double H2_TR, 
-                    double K2_TR, double PHI_2, double AA, double BB, 
+double threeintpts (double xint[], double yint[], double A1, double B1,
+                    double PHI_1, double A2, double B2, double H2_TR,
+                    double K2_TR, double PHI_2, double AA, double BB,
                     double CC, double DD, double EE, double FF,
                     int *rtnCode)
 {
@@ -1095,21 +1095,21 @@ double threeintpts (double xint[], double yint[], double A1, double B1,
           (*rtnCode) = ERROR_INTERSECTION_PTS;
           return -1.0;
      }
-	
-     //-- store the two interesection points into (x[1], y[1]) and 
+
+     //-- store the two interesection points into (x[1], y[1]) and
      //-- (x[2], y[2])
      switch (tanindex)
      {
      case 0:
           xint[0] = xint[2];
           yint[0] = yint[2];
-			
+
           break;
 
      case 1:
           xint[1] = xint[2];
           yint[1] = yint[2];
-			
+
           break;
 
      case 2:
@@ -1124,9 +1124,9 @@ double threeintpts (double xint[], double yint[], double A1, double B1,
 }
 
 //-- four intersection points
-double fourintpts (double xint[], double yint[], double A1, double B1, 
-                   double PHI_1, double A2, double B2, double H2_TR, 
-                   double K2_TR, double PHI_2, double AA, double BB, 
+double fourintpts (double xint[], double yint[], double A1, double B1,
+                   double PHI_1, double A2, double B2, double H2_TR,
+                   double K2_TR, double PHI_2, double AA, double BB,
                    double CC, double DD, double EE, double FF, int *rtnCode)
 {
      int i, j, k;
@@ -1141,7 +1141,7 @@ double fourintpts (double xint[], double yint[], double A1, double B1,
      double Area_1 = pi*A1B1;
      double Area_2 = pi*A2B2;
 
-	
+
      //-- only one case, which involves two segments from each ellipse, plus
      //-- two triangles.
      //-- get the parametric angles along the first ellipse for each of the
@@ -1153,11 +1153,11 @@ double fourintpts (double xint[], double yint[], double A1, double B1,
                xint[i] = (xint[i] < 0) ? -A1 : A1;
           if (yint[i] < 0.0) 	 //-- Quadrant III or IV
                theta[i] = twopi - acos (xint[i] / A1);
-          else             //-- Quadrant I or II      
+          else             //-- Quadrant I or II
                theta[i] = acos (xint[i] / A1);
      }
-		
-     //-- sort the angles by straight insertion, and put the points in 
+
+     //-- sort the angles by straight insertion, and put the points in
      //-- counter-clockwise order
 #if DEBUG
      for (k=0; k<=3; k++)
@@ -1170,17 +1170,17 @@ double fourintpts (double xint[], double yint[], double A1, double B1,
           tmp0 = theta[j];
           tmp1 = xint[j];
           tmp2 = yint[j];
-		
+
           for (k = j - 1; k >= 0; k--)
           {
                if (theta[k] <= tmp0)
                     break;
-			
+
                theta[k+1] = theta[k];
                xint[k+1] = xint[k];
                yint[k+1] = yint[k];
           }
-		
+
           theta[k+1] = tmp0;
           xint[k+1] = tmp1;
           yint[k+1] = tmp2;
@@ -1190,15 +1190,15 @@ double fourintpts (double xint[], double yint[], double A1, double B1,
      for (k=0; k<=3; k++)
      {
           printf("k=%d:  Theta = %f, xint=%f, yint=%f\n",k,theta[k], xint[k], yint[k]);
-     }    
+     }
 #endif
-	
+
      //-- find the area of the interior quadrilateral
      /* area1 = 0.5*fabs ((xint[3] - xint[1])*(yint[4] - yint[2]) */
      /* 				  - (xint[4] - xint[2])*(yint[3] - yint[1])); */
      area1 = 0.5*fabs ((xint[2] - xint[0])*(yint[3] - yint[1])
                        - (xint[3] - xint[1])*(yint[2] - yint[0]));
-	
+
      //-- the intersection points lie on the second ellipse in its once
      //-- translated+rotated position.  The segment algorithm is implemented
      //-- for an ellipse that is centered at the origin, and oriented with
@@ -1212,36 +1212,36 @@ double fourintpts (double xint[], double yint[], double A1, double B1,
      {
           xint_tr[i] = (xint[i] - H2_TR)*cosphi + (yint[i] - K2_TR)*-sinphi;
           yint_tr[i] = (xint[i] - H2_TR)*sinphi + (yint[i] - K2_TR)*cosphi;
-		
+
           if (fabs (xint_tr[i]) > A2)
                xint_tr[i] = (xint_tr[i] < 0) ? -A2 : A2;
           if (yint_tr[i] < 0.0) 	 //-- Quadrant III or IV
                theta_tr[i] = twopi - acos (xint_tr[i]/A2);
-          else             //-- Quadrant I or II      
+          else             //-- Quadrant I or II
                theta_tr[i] = acos (xint_tr[i]/A2);
      }
 
      //-- get the area of the two segments on ellipse 1
-     xmid = A1*cos ((theta[0] + theta[1])/2.0);	
+     xmid = A1*cos ((theta[0] + theta[1])/2.0);
      ymid = B1*sin ((theta[0] + theta[1])/2.0);
      //-- the point (xmid, ymid) is on the first ellipse 'between' the two
      //-- sorted intersection points (xint[1], yint[1]) and (xint[2], yint[2])
-     //-- when travelling counter- clockwise from (xint[1], yint[1]) to 
-     //-- (xint[2], yint[2]).  If the point (xmid, ymid) is inside the second 
-     //-- ellipse, then one desired segment of ellipse 1 contains the point 
+     //-- when travelling counter- clockwise from (xint[1], yint[1]) to
+     //-- (xint[2], yint[2]).  If the point (xmid, ymid) is inside the second
+     //-- ellipse, then one desired segment of ellipse 1 contains the point
      //-- (xmid, ymid), so integrate counterclockwise from (xint[1], yint[1])
-     //-- to (xint[2], yint[2]) for the first segment, and from 
+     //-- to (xint[2], yint[2]) for the first segment, and from
      //-- (xint[3], yint[3] to (xint[4], yint[4]) for the second segment.
      if (ellipse2tr (xmid, ymid, AA, BB, CC, DD, EE, FF) < 0.0)
      {
           area2 = 0.5*(A1B1*(theta[1] - theta[0])
                        - fabs (xint[0]*yint[1] - xint[1]*yint[0]));
-	    
+
           area3 = 0.5*(A1B1*(theta[3] - theta[2])
                         - fabs (xint[2]*yint[3] - xint[3]*yint[2]));
 
           area4 = 0.5*(A2B2*(theta_tr[2] - theta_tr[1]) - fabs (xint_tr[1]*yint_tr[2] - xint_tr[2]*yint_tr[1]) );
-			
+
           if (theta_tr[3] > theta_tr[0])
                area5 = 0.5*(A2B2*(theta_tr[0] - (theta_tr[3] - twopi))
                             - fabs (xint_tr[3]*yint_tr[0] - xint_tr[0]*yint_tr[3]));
@@ -1288,12 +1288,12 @@ double fourintpts (double xint[], double yint[], double A1, double B1,
 #endif
           area2 += Area_1;
      }
-		
+
 #if DEBUG
      printf("\narea1=%f, area2=%f area3=%f, area4=%f, area5=%f\n\n",area1, area2, area3, area4, area5);
 #endif
      OverlapArea = area1 + area2 + area3 + area4 + area5;
-	
+
      (*rtnCode) = FOUR_INTERSECTION_POINTS;
      return OverlapArea;
 }
@@ -1304,8 +1304,8 @@ int istanpt (double x, double y, double A1, double B1, double AA, double BB,
 {
      double x1, y1, x2, y2, theta, test1, test2, eps_radian;
 
-     //-- Avoid inverse trig calculation errors: there could be an error 
-     //-- if |x1/A| > 1.0 when calling acos().  If execution arrives here, 
+     //-- Avoid inverse trig calculation errors: there could be an error
+     //-- if |x1/A| > 1.0 when calling acos().  If execution arrives here,
      //-- then the point is on the ellipse within EPS.
      if (fabs (x) > A1)
           x = (x < 0) ? -A1 : A1;
@@ -1315,7 +1315,7 @@ int istanpt (double x, double y, double A1, double B1, double AA, double BB,
      //-- is located.  See Table 1 in the reference.
      if (y < 0.0) 	 //-- Quadrant III or IV
           theta = twopi - acos (x / A1);
-     else             //-- Quadrant I or II      
+     else             //-- Quadrant I or II
           theta = acos (x / A1);
 
      //-- determine the distance from the origin to the point (x, y)
@@ -1327,17 +1327,17 @@ int istanpt (double x, double y, double A1, double B1, double AA, double BB,
      /* 	eps_radian = 2.0*EPS; */
      /* else */
      /* 	eps_radian = asin (2.0*EPS/branch); */
-	
+
      //fix 24.11.12
      eps_radian = 0.1; //arbitrary value
-	
+
      //-- determine two points that are on each side of (x, y) and lie on
      //-- the first ellipse
      x1 = A1*cos (theta + eps_radian);
      y1 = B1*sin (theta + eps_radian);
      x2 = A1*cos (theta - eps_radian);
      y2 = B1*sin (theta - eps_radian);
-	
+
      //-- evaluate the two adjacent points in the second ellipse equation
      test1 = ellipse2tr (x1, y1, AA, BB, CC, DD, EE, FF);
      test2 = ellipse2tr (x2, y2, AA, BB, CC, DD, EE, FF);
@@ -1362,8 +1362,8 @@ int istanpt (double x, double y, double A1, double B1, double AA, double BB,
 }
 
 
-double ellipse_ellipse_overlap_netlibs (double PHI_1, double A1, double B1, 
-                                        double H1, double K1, double PHI_2, 
+double ellipse_ellipse_overlap_netlibs (double PHI_1, double A1, double B1,
+                                        double H1, double K1, double PHI_2,
                                         double A2, double B2, double H2, double K2,
                                         double X[4], double Y[4], int * NROOTS,
                                         int *rtnCode)
@@ -1395,12 +1395,12 @@ double ellipse_ellipse_overlap_netlibs (double PHI_1, double A1, double B1,
           return -1.0;
      }
      if ( (fabs (PHI_1) > (pi)) ){
-          PHI_1 = fmod (PHI_1, pi);		
+          PHI_1 = fmod (PHI_1, pi);
      }
      if ( (fabs (PHI_2) > (pi)) ){
-          PHI_2 = fmod (PHI_2, pi);	
+          PHI_2 = fmod (PHI_2, pi);
      }
-     
+
      //=======================================================================
      //== DETERMINE THE TWO ELLIPSE EQUATIONS FROM INPUT PARAMETERS ==========
      //=======================================================================
@@ -1412,18 +1412,18 @@ double ellipse_ellipse_overlap_netlibs (double PHI_1, double A1, double B1,
 
      //-- Working with the translated+rotated ellipses simplifies the
      //-- calculations.  The ellipses are translated then rotated so that the
-     //-- first ellipse is centered at the origin and oriented with the 
-     //-- coordinate axes.  Then, the first ellipse will have the implicit 
+     //-- first ellipse is centered at the origin and oriented with the
+     //-- coordinate axes.  Then, the first ellipse will have the implicit
      //-- (polynomial) form of
      //--   x^2/A1^2 + y+2/B1^2 = 1
-	
+
      //-- For the second ellipse, the center is first translated by the amount
-     //-- required to put the first ellipse at the origin, e.g., by (-H1, -K1)  
+     //-- required to put the first ellipse at the origin, e.g., by (-H1, -K1)
      //-- Then, the center of the second ellipse is rotated by the amount
      //-- required to orient the first ellipse with the coordinate axes, e.g.,
      //-- through the angle -PHI_1.
      //-- The translated and rotated center point coordinates for the second
-     //-- ellipse are found with the rotation matrix, derivations are 
+     //-- ellipse are found with the rotation matrix, derivations are
      //-- described in the reference.
      cosphi = cos (PHI_1);
      sinphi = sin (PHI_1);
@@ -1432,7 +1432,7 @@ double ellipse_ellipse_overlap_netlibs (double PHI_1, double A1, double B1,
      PHI_2R = PHI_2 - PHI_1;
      if ( (fabs (PHI_2R) > (twopi)) )
           PHI_2R = fmod (PHI_2R, twopi);
-		
+
 #if DEBUG
      printf("H2_TR=%f, K2_TR=%f, PHI_2R=%f\n", H2_TR, K2_TR, PHI_2R);
 #endif
@@ -1440,7 +1440,7 @@ double ellipse_ellipse_overlap_netlibs (double PHI_1, double A1, double B1,
      //-- in its translated-by (-H1, -H2) and rotated-by -PHI_1 postion
      //--       AA*x^2 + BB*x*y + CC*y^2 + DD*x + EE*y + FF = 0
      //-- Formulas derived in the reference
-     //-- To speed things up, store multiply-used expressions first 
+     //-- To speed things up, store multiply-used expressions first
      cosphi = cos (PHI_2R);
      cosphi2 = cosphi*cosphi;
      sinphi = sin (PHI_2R);
@@ -1459,7 +1459,7 @@ double ellipse_ellipse_overlap_netlibs (double PHI_1, double A1, double B1,
      CC = sinphi2/A22 + cosphi2/B22;
      DD = -2.0*cosphi*tmp0 - 2.0*sinphi*tmp1;
      EE = -2.0*sinphi*tmp0 + 2.0*cosphi*tmp1;
-     FF = tmp2*tmp2/A22 + tmp3*tmp3/B22 - 1.0;  
+     FF = tmp2*tmp2/A22 + tmp3*tmp3/B22 - 1.0;
      //=======================================================================
      //== CREATE AND SOLVE THE QUARTIC EQUATION TO FIND INTERSECTION POINTS ==
      //=======================================================================
@@ -1473,58 +1473,58 @@ double ellipse_ellipse_overlap_netlibs (double PHI_1, double A1, double B1,
      cy[4] = A1*A1*A1*A1  *AA*AA + B1*B1*(A1*A1*(BB*BB - 2.0*AA*CC)
           + B1*B1*CC*CC);
      cy[3] = 2.0*B1*(B1*B1*CC*EE + A1*A1*(BB*DD - AA*EE));
-     cy[2] = A1*A1*((B1*B1*(2.0*AA*CC - BB*BB) + DD*DD  - 2.0*AA*FF) 
+     cy[2] = A1*A1*((B1*B1*(2.0*AA*CC - BB*BB) + DD*DD  - 2.0*AA*FF)
           - 2.0*A1*A1*AA*AA) + B1*B1*(2.0*CC*FF + EE*EE);
      cy[1] = 2.0*B1*(A1*A1*(AA*EE - BB*DD) + EE*FF);
      cy[0] = (A1*(A1*AA - DD) + FF)*(A1*(A1*AA + DD) + FF);
 
      //-- Once the coefficients for the Quartic Equation in y are known, the
-     //-- roots of the quartic polynomial will represent y-values of the 
+     //-- roots of the quartic polynomial will represent y-values of the
      //-- intersection points of the two ellipse curves.
-     //-- The quartic sometimes degenerates into a polynomial of lesser 
+     //-- The quartic sometimes degenerates into a polynomial of lesser
      //-- degree, so handle all possible cases.
 #if DEBUG
      for(i=0; i<5; i++)
           printf("cy[%d]=%f\n",i, cy[i]);
-#endif	
+#endif
      if (fabs (cy[4]) > EPS){
           //== QUARTIC COEFFICIENT NONZERO, USE QUARTIC FORMULA ===============
           for (i = 0; i <= 3; i++)
                py[4-i] = cy[i]/cy[4];
           py[0] = 1.0;
-            
+
 #if DEBUG
           for(i=0; i<5; i++)
                printf("py[%d]=%f\n",i, py[i]);
 #endif
           BIQUADROOTS (py, r);
           nroots = 4;
-       
+
 #if DEBUG
           printf("nroots=%d\n", nroots);
 #endif
      }
-     else if (fabs (cy[3]) > EPS){ 
+     else if (fabs (cy[3]) > EPS){
           //== QUARTIC DEGENERATES TO CUBIC, USE CUBIC FORMULA ================
           for (i = 0; i <= 2; i++)
                py[3-i] = cy[i]/cy[3];
           py[0] = 1.0;
-		
+
           CUBICROOTS (py, r);
           nroots = 3;
           //#####################################################################################
      }
      else if (fabs (cy[2]) > EPS){
-		
+
           //== QUARTIC DEGENERATES TO QUADRATIC, USE QUADRATIC FORMULA ========
           for (i = 0; i <= 1; i++)
                py[2-i] = cy[i]/cy[2];
           py[0] = 1.0;
-          
+
           QUADROOTS (py, r);
           nroots = 2;
           //#####################################################################################
-     } 
+     }
      else  if (fabs (cy[1]) > EPS){
           //== QUARTIC DEGENERATES TO LINEAR: SOLVE DIRECTLY ==================
           //-- cy[1]*Y + cy[0] = 0
@@ -1549,19 +1549,19 @@ double ellipse_ellipse_overlap_netlibs (double PHI_1, double A1, double B1,
 #endif
      nychk = 0;
 // GSL returns roots sorted in ascending order. We need descending sorted roots
-     for (i = 1; i <= nroots; i++){ 
+     for (i = 1; i <= nroots; i++){
      /* for (i = nroots; i >= 1; i--){ */
           if (fabs (r[2][i]) < EPS){
 
                nychk++;
 #if DEBUG
                printf ("nychk = %d\n",nychk);
-#endif    
+#endif
                ychk[ nychk - 1 ] = r[1][i]*B1;
 #if DEBUG
                printf("ROOT is Real,  i=%d --> %f (B1=%f)\n",i,r[1][i],B1);
 #endif
-          } //if fabs() 
+          } //if fabs()
      }// for i
 
 //-- sort the real roots by straight insertion
@@ -1601,7 +1601,7 @@ double ellipse_ellipse_overlap_netlibs (double PHI_1, double A1, double B1,
 #if DEBUG
           printf("\tx1=%f, y1=%f, A=%f. B=%f ---> ellipse2tr(x1)= %f\n",x1, ychk[i], A1, B1, ellipse2tr(x1, ychk[i], AA, BB, CC, DD, EE, FF) );
           printf("\tx2=%f, y1=%f, A=%f. B=%f ---> ellipse2tr(x2) %f\n",x2, ychk[i], A1, B1, ellipse2tr(x2, ychk[i], AA, BB, CC, DD, EE, FF) );
-#endif		
+#endif
           if (fabs(ellipse2tr(x1, ychk[i], AA, BB, CC, DD, EE, FF)) < EPS){
                nintpts++;
 #if DEBUG
@@ -1619,7 +1619,7 @@ double ellipse_ellipse_overlap_netlibs (double PHI_1, double A1, double B1,
           }
 
           if ((fabs(ellipse2tr(x2, ychk[i], AA, BB, CC, DD, EE, FF)) < EPS)
-                    && (fabs (x2 - x1) > EPS)){				
+                    && (fabs (x2 - x1) > EPS)){
                nintpts++;
 #if DEBUG
                printf("first if x2. nintps=%d, Dx=%f (eps2=%f) \n",nintpts, fabs (x2 - x1), EPS);
@@ -1647,31 +1647,31 @@ double ellipse_ellipse_overlap_netlibs (double PHI_1, double A1, double B1,
      switch (nintpts){
           case 0:
           case 1:
-               OverlapArea = nointpts (A1, B1, A2, B2, H1, K1, H2, K2, PHI_1, 
-                    PHI_2, H2_TR, K2_TR, AA,BB, CC, DD, EE, 
+               OverlapArea = nointpts (A1, B1, A2, B2, H1, K1, H2, K2, PHI_1,
+                    PHI_2, H2_TR, K2_TR, AA,BB, CC, DD, EE,
                     FF, rtnCode);
                /* free (ychk); */
                /* free(xint); */
                /* free(yint); */
                return OverlapArea;
-			
+
           case 2:
                //-- when there are two intersection points, it is possible for
                //-- them to both be tangents, in which case one of the ellipses
                //-- is fully contained within the other.  Check the points for
                //-- tangents; if one of the points is a tangent, then the other
-               //-- must be as well, otherwise there would be more than 2 
+               //-- must be as well, otherwise there would be more than 2
                //-- intersection points.
-               fnRtnCode = istanpt (xint[0], yint[0], A1, B1, AA, BB, CC, DD, 
+               fnRtnCode = istanpt (xint[0], yint[0], A1, B1, AA, BB, CC, DD,
                     EE, FF);
 
-			
+
                if (fnRtnCode == TANGENT_POINT){
 #if DEBUG
                     printf("one point is tangent\n");
 #endif
-                    OverlapArea = nointpts (A1, B1, A2, B2, H1, K1, H2, K2,  
-                                       PHI_1, PHI_2, H2_TR, K2_TR, AA,BB, CC,  
+                    OverlapArea = nointpts (A1, B1, A2, B2, H1, K1, H2, K2,
+                                       PHI_1, PHI_2, H2_TR, K2_TR, AA,BB, CC,
                                        DD, EE, FF, rtnCode);
 
                }
@@ -1684,35 +1684,35 @@ double ellipse_ellipse_overlap_netlibs (double PHI_1, double A1, double B1,
 #endif
                }
                return OverlapArea;
-			
+
                case 3:
                     //-- when there are three intersection points, one and only one
                     //-- of the points must be a tangent point.
                     OverlapArea = threeintpts (xint, yint,  A1, B1, PHI_1, A2, B2,
-                         H2_TR, K2_TR, PHI_2, AA, BB, CC, DD, 
+                         H2_TR, K2_TR, PHI_2, AA, BB, CC, DD,
                          EE, FF, rtnCode);
                     return OverlapArea;
-			
+
                case 4:
                     //-- four intersections points has only one case.
                     OverlapArea = fourintpts (xint, yint,  A1, B1, PHI_1, A2, B2,
-                         H2_TR, K2_TR, PHI_2, AA, BB, CC, DD, 
+                         H2_TR, K2_TR, PHI_2, AA, BB, CC, DD,
                          EE, FF, rtnCode);
                     return OverlapArea;
-		
+
                default:
                     //-- should never get here (but get compiler warning for missing
                     //-- return value if this line is omitted)
                     (*rtnCode) = ERROR_INTERSECTION_PTS;
-			
+
                     return -1.0;
      } //switch
 }
 
 //===========================================================================
 //-- CACM Algorithm 326: Roots of low order polynomials.
-//-- Nonweiler, Terence R.F., CACM Algorithm 326: Roots of low order 
-//-- polynomials, Communications of the ACM, vol. 11 no. 4, pages 
+//-- Nonweiler, Terence R.F., CACM Algorithm 326: Roots of low order
+//-- polynomials, Communications of the ACM, vol. 11 no. 4, pages
 //-- 269-270 (1968). Translated into c and programmed by M. Dow, ANUSF,
 //-- Australian National University, Canberra, Australia.
 //-- Accessed at http://www.netlib.org/toms/326.
@@ -1815,7 +1815,7 @@ void CUBICROOTS(double p[], double r[][5])
           d=-t-c-s;
           c=c-s;
           t=t-s;
-      
+
           if(fabs(c)>fabs(t))
           {
                r[1][3]=c;
@@ -1939,21 +1939,21 @@ END:
 //== DEPENDENT FUNCTIONS ====================================================
 //===========================================================================
 
-/* qsort double comparison function 
+/* qsort double comparison function
    implements quick qort
-*/ 
-int double_cmp(const void *a, const void *b) 
-{ 
-     const double *ia = (const double *)a; // casting pointer types 
+*/
+int double_cmp(const void *a, const void *b)
+{
+     const double *ia = (const double *)a; // casting pointer types
      const double *ib = (const double *)b;
-     return *ia  - *ib; 
-     /* double comparison: returns negative if b > a 
-       and positive if a > b */ 
-} 
+     return *ia  - *ib;
+     /* double comparison: returns negative if b > a
+       and positive if a > b */
+}
 
 
-double ellipse_ellipse_overlap_gems (double PHI_1, double A1, double B1, 
-                                        double H1, double K1, double PHI_2, 
+double ellipse_ellipse_overlap_gems (double PHI_1, double A1, double B1,
+                                        double H1, double K1, double PHI_2,
                                         double A2, double B2, double H2, double K2,
                                         double X[4], double Y[4], int * NROOTS,
                                         int *rtnCode)
@@ -1986,12 +1986,12 @@ double ellipse_ellipse_overlap_gems (double PHI_1, double A1, double B1,
           return -1.0;
      }
      if ( (fabs (PHI_1) > (pi)) ){
-          PHI_1 = fmod (PHI_1, pi);		
+          PHI_1 = fmod (PHI_1, pi);
      }
      if ( (fabs (PHI_2) > (pi)) ){
-          PHI_2 = fmod (PHI_2, pi);	
+          PHI_2 = fmod (PHI_2, pi);
      }
-     
+
      //=======================================================================
      //== DETERMINE THE TWO ELLIPSE EQUATIONS FROM INPUT PARAMETERS ==========
      //=======================================================================
@@ -2003,18 +2003,18 @@ double ellipse_ellipse_overlap_gems (double PHI_1, double A1, double B1,
 
      //-- Working with the translated+rotated ellipses simplifies the
      //-- calculations.  The ellipses are translated then rotated so that the
-     //-- first ellipse is centered at the origin and oriented with the 
-     //-- coordinate axes.  Then, the first ellipse will have the implicit 
+     //-- first ellipse is centered at the origin and oriented with the
+     //-- coordinate axes.  Then, the first ellipse will have the implicit
      //-- (polynomial) form of
      //--   x^2/A1^2 + y+2/B1^2 = 1
-	
+
      //-- For the second ellipse, the center is first translated by the amount
-     //-- required to put the first ellipse at the origin, e.g., by (-H1, -K1)  
+     //-- required to put the first ellipse at the origin, e.g., by (-H1, -K1)
      //-- Then, the center of the second ellipse is rotated by the amount
      //-- required to orient the first ellipse with the coordinate axes, e.g.,
      //-- through the angle -PHI_1.
      //-- The translated and rotated center point coordinates for the second
-     //-- ellipse are found with the rotation matrix, derivations are 
+     //-- ellipse are found with the rotation matrix, derivations are
      //-- described in the reference.
      cosphi = cos (PHI_1);
      sinphi = sin (PHI_1);
@@ -2023,7 +2023,7 @@ double ellipse_ellipse_overlap_gems (double PHI_1, double A1, double B1,
      PHI_2R = PHI_2 - PHI_1;
      if ( (fabs (PHI_2R) > (twopi)) )
           PHI_2R = fmod (PHI_2R, twopi);
-		
+
 #if DEBUG
      printf("H2_TR=%f, K2_TR=%f, PHI_2R=%f\n", H2_TR, K2_TR, PHI_2R);
 #endif
@@ -2031,7 +2031,7 @@ double ellipse_ellipse_overlap_gems (double PHI_1, double A1, double B1,
      //-- in its translated-by (-H1, -H2) and rotated-by -PHI_1 postion
      //--       AA*x^2 + BB*x*y + CC*y^2 + DD*x + EE*y + FF = 0
      //-- Formulas derived in the reference
-     //-- To speed things up, store multiply-used expressions first 
+     //-- To speed things up, store multiply-used expressions first
      cosphi = cos (PHI_2R);
      cosphi2 = cosphi*cosphi;
      sinphi = sin (PHI_2R);
@@ -2050,7 +2050,7 @@ double ellipse_ellipse_overlap_gems (double PHI_1, double A1, double B1,
      CC = sinphi2/A22 + cosphi2/B22;
      DD = -2.0*cosphi*tmp0 - 2.0*sinphi*tmp1;
      EE = -2.0*sinphi*tmp0 + 2.0*cosphi*tmp1;
-     FF = tmp2*tmp2/A22 + tmp3*tmp3/B22 - 1.0;  
+     FF = tmp2*tmp2/A22 + tmp3*tmp3/B22 - 1.0;
      //=======================================================================
      //== CREATE AND SOLVE THE QUARTIC EQUATION TO FIND INTERSECTION POINTS ==
      //=======================================================================
@@ -2064,26 +2064,26 @@ double ellipse_ellipse_overlap_gems (double PHI_1, double A1, double B1,
      cy[4] = A1*A1*A1*A1  *AA*AA + B1*B1*(A1*A1*(BB*BB - 2.0*AA*CC)
           + B1*B1*CC*CC);
      cy[3] = 2.0*B1*(B1*B1*CC*EE + A1*A1*(BB*DD - AA*EE));
-     cy[2] = A1*A1*((B1*B1*(2.0*AA*CC - BB*BB) + DD*DD  - 2.0*AA*FF) 
+     cy[2] = A1*A1*((B1*B1*(2.0*AA*CC - BB*BB) + DD*DD  - 2.0*AA*FF)
           - 2.0*A1*A1*AA*AA) + B1*B1*(2.0*CC*FF + EE*EE);
      cy[1] = 2.0*B1*(A1*A1*(AA*EE - BB*DD) + EE*FF);
      cy[0] = (A1*(A1*AA - DD) + FF)*(A1*(A1*AA + DD) + FF);
 
      //-- Once the coefficients for the Quartic Equation in y are known, the
-     //-- roots of the quartic polynomial will represent y-values of the 
+     //-- roots of the quartic polynomial will represent y-values of the
      //-- intersection points of the two ellipse curves.
-     //-- The quartic sometimes degenerates into a polynomial of lesser 
+     //-- The quartic sometimes degenerates into a polynomial of lesser
      //-- degree, so handle all possible cases.
 #if DEBUG
      for(i=0; i<5; i++)
           printf("cy[%d]=%f\n",i, cy[i]);
-#endif	
+#endif
      if (fabs (cy[4]) > EPS){
           //== QUARTIC COEFFICIENT NONZERO, USE QUARTIC FORMULA ===============
           for (i = 0; i <= 3; i++)
                py[4-i] = cy[i]/cy[4];
           py[0] = 1.0;
-            
+
 #if DEBUG
           for(i=0; i<5; i++)
                printf("py[%d]=%f\n",i, py[i]);
@@ -2091,33 +2091,33 @@ double ellipse_ellipse_overlap_gems (double PHI_1, double A1, double B1,
           //BIQUADROOTS (py, r);
           SolveQuartic(py, r[1]);
           nroots = 4;
-       
+
 #if DEBUG
           printf("nroots=%d\n", nroots);
 #endif
      }
-     else if (fabs (cy[3]) > EPS){ 
+     else if (fabs (cy[3]) > EPS){
           //== QUARTIC DEGENERATES TO CUBIC, USE CUBIC FORMULA ================
           for (i = 0; i <= 2; i++)
                py[3-i] = cy[i]/cy[3];
           py[0] = 1.0;
-		
+
           /* CUBICROOTS (py, r); */
           SolveCubic(py, r[1]);
           nroots = 3;
           //#####################################################################################
      }
      else if (fabs (cy[2]) > EPS){
-		
+
           //== QUARTIC DEGENERATES TO QUADRATIC, USE QUADRATIC FORMULA ========
           for (i = 0; i <= 1; i++)
                py[2-i] = cy[i]/cy[2];
           py[0] = 1.0;
-          
+
           SolveQuadric(py, r[1]);
           nroots = 2;
           //#####################################################################################
-     } 
+     }
      else  if (fabs (cy[1]) > EPS){
           //== QUARTIC DEGENERATES TO LINEAR: SOLVE DIRECTLY ==================
           //-- cy[1]*Y + cy[0] = 0
@@ -2148,12 +2148,12 @@ double ellipse_ellipse_overlap_gems (double PHI_1, double A1, double B1,
                nychk++;
 #if DEBUG
                printf ("nychk = %d\n",nychk);
-#endif    
+#endif
                ychk[ nychk - 1 ] = r[1][i]*B1;
 #if DEBUG
                printf("ROOT is Real,  i=%d --> %f (B1=%f)\n",i,r[1][i],B1);
 #endif
-          } //if fabs() 
+          } //if fabs()
      }// for i
 
 
@@ -2192,7 +2192,7 @@ double ellipse_ellipse_overlap_gems (double PHI_1, double A1, double B1,
 #if DEBUG
           printf("\tx1=%f, y1=%f, A=%f. B=%f ---> ellipse2tr(x1)= %f\n",x1, ychk[i], A1, B1, ellipse2tr(x1, ychk[i], AA, BB, CC, DD, EE, FF) );
           printf("\tx2=%f, y1=%f, A=%f. B=%f ---> ellipse2tr(x2) %f\n",x2, ychk[i], A1, B1, ellipse2tr(x2, ychk[i], AA, BB, CC, DD, EE, FF) );
-#endif		
+#endif
           if (fabs(ellipse2tr(x1, ychk[i], AA, BB, CC, DD, EE, FF)) < EPS){
                nintpts++;
 #if DEBUG
@@ -2210,7 +2210,7 @@ double ellipse_ellipse_overlap_gems (double PHI_1, double A1, double B1,
           }
 
           if ((fabs(ellipse2tr(x2, ychk[i], AA, BB, CC, DD, EE, FF)) < EPS)
-                    && (fabs (x2 - x1) > EPS)){				
+                    && (fabs (x2 - x1) > EPS)){
                nintpts++;
 #if DEBUG
                printf("first if x2. nintps=%d, Dx=%f (eps2=%f) \n",nintpts, fabs (x2 - x1), EPS);
@@ -2238,31 +2238,31 @@ double ellipse_ellipse_overlap_gems (double PHI_1, double A1, double B1,
      switch (nintpts){
           case 0:
           case 1:
-               OverlapArea = nointpts (A1, B1, A2, B2, H1, K1, H2, K2, PHI_1, 
-                    PHI_2, H2_TR, K2_TR, AA,BB, CC, DD, EE, 
+               OverlapArea = nointpts (A1, B1, A2, B2, H1, K1, H2, K2, PHI_1,
+                    PHI_2, H2_TR, K2_TR, AA,BB, CC, DD, EE,
                     FF, rtnCode);
                /* free (ychk); */
                /* free(xint); */
                /* free(yint); */
                return OverlapArea;
-			
+
           case 2:
                //-- when there are two intersection points, it is possible for
                //-- them to both be tangents, in which case one of the ellipses
                //-- is fully contained within the other.  Check the points for
                //-- tangents; if one of the points is a tangent, then the other
-               //-- must be as well, otherwise there would be more than 2 
+               //-- must be as well, otherwise there would be more than 2
                //-- intersection points.
-               fnRtnCode = istanpt (xint[0], yint[0], A1, B1, AA, BB, CC, DD, 
+               fnRtnCode = istanpt (xint[0], yint[0], A1, B1, AA, BB, CC, DD,
                     EE, FF);
 
-			
+
                if (fnRtnCode == TANGENT_POINT){
 #if DEBUG
                     printf("one point is tangent\n");
 #endif
-                    OverlapArea = nointpts (A1, B1, A2, B2, H1, K1, H2, K2,  
-                                       PHI_1, PHI_2, H2_TR, K2_TR, AA,BB, CC,  
+                    OverlapArea = nointpts (A1, B1, A2, B2, H1, K1, H2, K2,
+                                       PHI_1, PHI_2, H2_TR, K2_TR, AA,BB, CC,
                                        DD, EE, FF, rtnCode);
 
                }
@@ -2275,27 +2275,27 @@ double ellipse_ellipse_overlap_gems (double PHI_1, double A1, double B1,
 #endif
                }
                return OverlapArea;
-			
+
                case 3:
                     //-- when there are three intersection points, one and only one
                     //-- of the points must be a tangent point.
                     OverlapArea = threeintpts (xint, yint,  A1, B1, PHI_1, A2, B2,
-                         H2_TR, K2_TR, PHI_2, AA, BB, CC, DD, 
+                         H2_TR, K2_TR, PHI_2, AA, BB, CC, DD,
                          EE, FF, rtnCode);
                     return OverlapArea;
-			
+
                case 4:
                     //-- four intersections points has only one case.
                     OverlapArea = fourintpts (xint, yint,  A1, B1, PHI_1, A2, B2,
-                         H2_TR, K2_TR, PHI_2, AA, BB, CC, DD, 
+                         H2_TR, K2_TR, PHI_2, AA, BB, CC, DD,
                          EE, FF, rtnCode);
                     return OverlapArea;
-		
+
                default:
                     //-- should never get here (but get compiler warning for missing
                     //-- return value if this line is omitted)
                     (*rtnCode) = ERROR_INTERSECTION_PTS;
-			
+
                     return -1.0;
      } //switch
 }

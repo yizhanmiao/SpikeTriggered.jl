@@ -1,0 +1,27 @@
+[project]
+name = "SpikeTriggered.jl"
+version = "0.1.0"
+authors = ["Yizhan Miao <yizhanmiao@pm.me>"]
+channels = ["conda-forge"]
+platforms = ["osx-64", "linux-64", "osx-arm64", "win-64"]
+
+[activation.env]
+JULIA_PROJECT="@."
+JULIA_PKG_USE_CLI_GIT="true"
+GIT_LFS_SKIP_SMUDGE="1"
+JULIA_CONDAPKG_BACKEND="Null"
+
+JULIA_PYTHONCALL_EXE="$PIXI_PROJECT_ROOT/.pixi/envs/default/bin/python"
+
+[target.win-64.activation.env]
+JULIA_PYTHONCALL_EXE="%PIXI_PROJECT_ROOT%\\.pixi\\envs\\default\\python.exe"
+
+# using Github DuckDB
+JULIA_DUCKDB_LIBRARY="%PIXI_PROJECT_ROOT%\\tmp\\duckdb.dll"
+
+[tasks]
+
+[dependencies]
+pre-commit = "*"
+
+[pypi-dependencies]
