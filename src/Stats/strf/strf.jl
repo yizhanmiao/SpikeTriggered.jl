@@ -54,3 +54,4 @@ strf_hstack
 @deprecate make_strf strf_
 
 include("gaussian2dfit.jl")
+include("misc.jl")
