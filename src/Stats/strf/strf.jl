@@ -55,3 +55,4 @@ strf_hstack
 
 include("gaussian2dfit.jl")
 include("misc.jl")
+include("pixel_map.jl")
