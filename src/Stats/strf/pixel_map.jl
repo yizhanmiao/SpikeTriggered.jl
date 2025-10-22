@@ -28,24 +28,35 @@ return binary masks of elements larger than the half maximum.
 
 In most cases, you should use `get_filtered_pixel_map`.
 """
-function get_filtered_mask_full(strfs... ;)
-    return map(i -> abs.(i) .> 0.5, get_filtered_strf(strfs...))
+function get_filtered_mask_full(strfs... ; kwargs...)
+    return map(i -> abs.(i) .> 0.5, get_filtered_strf(strfs...; kwargs...))
 end
 
 @doc raw"""
-    get_filtered_pixel_map(strfs...)
+    get_filtered_pixel_map(strfs...; connectivity=4, s=3)
 
 Mimicing the behavior from [1], where on and off maps are filtered
 and thresholded by 50% of the maximum; and only keep those pixels that
 have direct connections with the maximum pixel.
 
 The outputs are binary matrices.
+                                         
+## Arguments
+
+- `strfs...`: frames of STAs; they will be used collectively to find the maximum value.
+Make sure they are in 2D matrix format.
+
+## Keyword Arguments
+
+- `connectivity=4`: the final connection is using `flood fill` algorithm.
+It can be either 4-way or 8-way connection.
+- `s=3`: moving average kernel size.
 
 1. Müllner, F. E. & Roska, B. Individual thalamic inhibitory interneurons are functionally specialized toward distinct visual features. Neuron 112, 2765-2782.e9 (2024).
 """
-function get_filtered_pixel_map(strfs...; connectivity=4)
-    filtered_map = get_filtered_strf(strfs...)
-    mask = find_filtered_mask_full(strfs...)
+function get_filtered_pixel_map(strfs::AbstractMatrix...; connectivity=4, s=3)
+    filtered_map = get_filtered_strf(strfs...; s)
+    mask = find_filtered_mask_full(strfs...; s)
     
     initnode = let
         tmp = map(i->findmax(abs.(i)), filtered_map)
