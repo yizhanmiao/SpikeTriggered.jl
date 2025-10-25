@@ -52,6 +52,16 @@ Make sure they are in 2D matrix format.
 It can be either 4-way or 8-way connection.
 - `s=3`: moving average kernel size.
 
+## Examples
+
+```julia
+# process the on and off map together so the joint maximum value is used.
+(mask_on, mask_off) = get_filtered_pixel_map(frame_on, frame_off)
+
+# even with one input frame, the output is a one-element tuple.
+(mask,) = get_filtered_pixel_map(frame)
+```
+
 1. Müllner, F. E. & Roska, B. Individual thalamic inhibitory interneurons are functionally specialized toward distinct visual features. Neuron 112, 2765-2782.e9 (2024).
 """
 function get_filtered_pixel_map(strfs::AbstractMatrix...; connectivity=4, s=3)
