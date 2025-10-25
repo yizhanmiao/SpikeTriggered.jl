@@ -12,7 +12,7 @@ on each strf input; and normalized by the common absolute maximum value.
 (s_on, s_off) = get_filtered_strf(frame_on, frame_off)
 ```
 
-SEE ALSO: `find_filtered_mask_full` and `get_filtered_pixel_map`
+SEE ALSO: `get_filtered_mask_full` and `get_filtered_pixel_map`
 """
 function get_filtered_strf(strfs...; s=3)
     strf_smoothed = map(i->conv(i, ones(s, s)./(s*s))[2:end-1, 2:end-1], strfs)
@@ -56,7 +56,7 @@ It can be either 4-way or 8-way connection.
 """
 function get_filtered_pixel_map(strfs::AbstractMatrix...; connectivity=4, s=3)
     filtered_map = get_filtered_strf(strfs...; s)
-    mask = find_filtered_mask_full(strfs...; s)
+    mask = get_filtered_mask_full(strfs...; s)
     
     initnode = let
         tmp = map(i->findmax(abs.(i)), filtered_map)
