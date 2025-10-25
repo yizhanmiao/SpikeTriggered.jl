@@ -70,7 +70,7 @@ function image2dataset(image::AbstractMatrix; upsample=1, interp=Linear(), norm=
     ]
 
     _x = map(identity, _sample_ind)
-    _y = map(x -> _frm[x[2], x[1]], _sample_ind)
+    _y = map(x -> _frm(x[2], x[1]), _sample_ind)
     #NOTE: # srf is organized as HxW, ie: [y, x]
 
     _y = norm ? _y ./ maximum(abs, _y) : _y
