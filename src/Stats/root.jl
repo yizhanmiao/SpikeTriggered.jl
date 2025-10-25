@@ -12,6 +12,7 @@ using FLoops: @floop
 using FHist: Hist1D, bincounts
 using ToeplitzMatrices: Circulant
 using GeometryBasics: Point2
+using DSP: conv
 using Optim: optimize, NelderMead, Options as OptimOptions, minimizer
 using Interpolations: interpolate, BSpline, Linear, OnGrid
 
