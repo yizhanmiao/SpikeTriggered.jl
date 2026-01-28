@@ -104,10 +104,10 @@ PSTH from averaging rasters.
 If `norm` is `true`, PSTH will be normalized by the length of trials.
 """
 function spike_histogram(
-    raster::SpikeRaster{T}, args...; norm::Bool=true, kwargs...
+    raster::SpikeRaster{T}, edges::AbstractVector; norm::Bool=true, kwargs...
 ) where {T}
     _flatten = reduce(vcat, raster; init=T[])
-    _psth = spike_histogram(_flatten, args...; kwargs...)
+    _psth = spike_histogram(_flatten, edges; kwargs...)
     return norm ? _psth ./ length(raster) : _psth
 end
 

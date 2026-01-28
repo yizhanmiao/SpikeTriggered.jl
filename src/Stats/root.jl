@@ -16,7 +16,7 @@ using DSP: conv
 using Optim: optimize, NelderMead, Options as OptimOptions, minimizer
 using Interpolations: interpolate, BSpline, Linear, OnGrid
 
-const SpikeRaster{T} = Vector{Vector{T}}
+const SpikeRaster{T} = AbstractVector{<:AbstractVector{T}}
 const AbstractSpikeTrain{T} = AbstractVector{T}
 const AbstractPSTH{T} = AbstractVecOrMat{T}    # [nTimepoints] or [nTimepoints x nRepeats]
 const AbstractStimulus{T} = AbstractMatrix{T}  # [nDimensions x nTimepoints]
