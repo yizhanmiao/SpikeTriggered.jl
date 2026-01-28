@@ -1,4 +1,4 @@
-export get_filtered_pixel_map
+export get_pixel_cloud
 public get_filtered_strf, get_filtered_mask_full
 
 @doc raw"""
@@ -64,7 +64,7 @@ It can be either 4-way or 8-way connection.
 
 1. Müllner, F. E. & Roska, B. Individual thalamic inhibitory interneurons are functionally specialized toward distinct visual features. Neuron 112, 2765-2782.e9 (2024).
 """
-function get_filtered_pixel_map(strfs::AbstractMatrix...; connectivity=4, s=3)
+function get_pixel_cloud(strfs::AbstractMatrix...; connectivity=4, s=3)
     filtered_map = get_filtered_strf(strfs...; s)
     mask = get_filtered_mask_full(strfs...; s)
     
@@ -76,3 +76,5 @@ function get_filtered_pixel_map(strfs::AbstractMatrix...; connectivity=4, s=3)
     _tmp = map(i->floodfill!(collect(Int8, i), initnode, 1, 9; connectivity), mask)
     return map(i->i .== 9, _tmp)
 end
+
+@deprecate get_filtered_pixel_map(args...; kwargs...) get_pixel_cloud(args...; kwargs...)

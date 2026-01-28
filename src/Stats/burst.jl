@@ -129,7 +129,7 @@ Split spike train into burst and tonic groups using `detector` function.
 function split_tonic_burst(spk; detector=burst_detect, kwargs...)
     _burst_idx = detector(spk; keep_index=true, kwargs...)
     _spk = deepcopy(spk)
-    splice!(_spk, reduce(vcat, _burst_idx))
+    splice!(_spk, reduce(vcat, _burst_idx; init=Int64[]))
     (; burst=map(x -> spk[x], _burst_idx), tonic=_spk)
 end
 
@@ -140,10 +140,8 @@ Split spike train into burst and tonic groups using `detector` function.
 But only the cardinal spike of burst is returned.
 """
 function split_tonic_cardinal(spk; detector=burst_detect, kwargs...)
-    _burst_idx = detector(spk; keep_index=true, kwargs...)
-    _spk = deepcopy(spk)
-    splice!(_spk, reduce(vcat, _burst_idx))
-    (; burst=map(x -> spk[x[1]], _burst_idx), tonic=_spk)
+    tmp = split_tonic_burst(spk; detector, kwargs...)
+    (; tmp..., burst=map(first, tmp.burst))
 end
 
 @doc raw"""

@@ -67,10 +67,10 @@ If `counttype` is not specified, the returned vector will have same type `T`
 function spike_histogram(
     spk::AbstractSpikeTrain{T},
     edges::AbstractVector;
-    dtype::Union{Type,Nothing}=nothing,
+    dtype::Union{Type,Nothing}=Float64,
     kwargs...,
-) where {T<:Real}
-    dtype = isnothing(dtype) ? T : dtype
+) where {T}
+    dtype = T <: AbstractFloat ? T : dtype
     if isempty(spk)
         zeros(dtype, length(edges) - 1)
     else
@@ -105,7 +105,7 @@ If `norm` is `true`, PSTH will be normalized by the length of trials.
 """
 function spike_histogram(
     raster::SpikeRaster{T}, args...; norm::Bool=true, kwargs...
-) where {T<:Real}
+) where {T}
     _flatten = reduce(vcat, raster; init=T[])
     _psth = spike_histogram(_flatten, args...; kwargs...)
     return norm ? _psth ./ length(raster) : _psth
@@ -141,12 +141,12 @@ If `norm` is `true`, the results will be normalized by the maximum value.
 All `kwargs` will be passed to `kernel` function.
 """
 function spike_histogram_smoothed(
-    spk::AbstractSpikeTrain{T},
-    proj::AbstractArray,
+    spk::AbstractSpikeTrain,
+    proj::AbstractArray{T},
     kernel::Function=gaussian_kernel;
     norm=true,
     kwargs...,
-) where {T<:Real}
+) where {T}
     isempty(spk) && (return zeros(T, size(proj)))
     _psth = similar(proj, T)
     @floop for idx in eachindex(proj)
@@ -165,7 +165,7 @@ otherwise, it will be divided by the number of trials in the raster.
 """
 function spike_histogram_smoothed(
     raster::SpikeRaster{T}, args...; norm=false, kwargs...
-) where {T<:Real}
+) where {T}
     _flatten = reduce(vcat, raster; init=T[])
     _N = length(raster)
     if norm
