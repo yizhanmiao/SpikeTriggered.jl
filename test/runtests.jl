@@ -11,4 +11,5 @@ end
 
 @testset "spike statistics" begin
     include("psth.jl")
+    include("burst.jl")
 end
