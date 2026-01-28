@@ -142,7 +142,7 @@ All `kwargs` will be passed to `kernel` function.
 """
 function spike_histogram_smoothed(
     spk::AbstractSpikeTrain,
-    proj::AbstractArray{T},
+    proj::AbstractVector{T},
     kernel::Function=gaussian_kernel;
     norm=true,
     kwargs...,
@@ -164,14 +164,14 @@ If `norm` is `true`, PSTH will be normalized to the maximum number;
 otherwise, it will be divided by the number of trials in the raster.
 """
 function spike_histogram_smoothed(
-    raster::SpikeRaster{T}, args...; norm=false, kwargs...
+    raster::SpikeRaster{T}, proj::AbstractVector; norm=false, kwargs...
 ) where {T}
     _flatten = reduce(vcat, raster; init=T[])
     _N = length(raster)
     if norm
-        spike_histogram_smoothed(_flatten, args...; norm=true, kwargs...)
+        spike_histogram_smoothed(_flatten, proj; norm=true, kwargs...)
     else
-        spike_histogram_smoothed(_flatten, args...; norm=false, kwargs...) ./ _N
+        spike_histogram_smoothed(_flatten, proj; norm=false, kwargs...) ./ _N
     end
 end
 
