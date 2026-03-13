@@ -15,7 +15,7 @@ function spike_raster(
     duration::Real=1.0,
     tail::Real=0.5,
     offset::Bool=true,
-) where {T<:Real}
+) where {T}
     output = Vector{T}[]
     for item in markers
         _candidates = spk[(item - head) .< spk .<= (item + duration + tail)]

@@ -67,10 +67,10 @@ If `counttype` is not specified, the returned vector will have same type `T`
 function spike_histogram(
     spk::AbstractSpikeTrain{T},
     edges::AbstractVector;
-    dtype::Union{Type,Nothing}=nothing,
+    dtype::Union{Type,Nothing}=Float64,
     kwargs...,
-) where {T<:Real}
-    dtype = isnothing(dtype) ? T : dtype
+) where {T}
+    dtype = T <: AbstractFloat ? T : dtype
     if isempty(spk)
         zeros(dtype, length(edges) - 1)
     else
@@ -104,10 +104,10 @@ PSTH from averaging rasters.
 If `norm` is `true`, PSTH will be normalized by the length of trials.
 """
 function spike_histogram(
-    raster::SpikeRaster{T}, args...; norm::Bool=true, kwargs...
-) where {T<:Real}
+    raster::SpikeRaster{T}, edges::AbstractVector; norm::Bool=true, kwargs...
+) where {T}
     _flatten = reduce(vcat, raster; init=T[])
-    _psth = spike_histogram(_flatten, args...; kwargs...)
+    _psth = spike_histogram(_flatten, edges; kwargs...)
     return norm ? _psth ./ length(raster) : _psth
 end
 
@@ -141,12 +141,12 @@ If `norm` is `true`, the results will be normalized by the maximum value.
 All `kwargs` will be passed to `kernel` function.
 """
 function spike_histogram_smoothed(
-    spk::AbstractSpikeTrain{T},
-    proj::AbstractArray,
+    spk::AbstractSpikeTrain,
+    proj::AbstractVector{T},
     kernel::Function=gaussian_kernel;
     norm=true,
     kwargs...,
-) where {T<:Real}
+) where {T}
     isempty(spk) && (return zeros(T, size(proj)))
     _psth = similar(proj, T)
     @floop for idx in eachindex(proj)
@@ -164,14 +164,14 @@ If `norm` is `true`, PSTH will be normalized to the maximum number;
 otherwise, it will be divided by the number of trials in the raster.
 """
 function spike_histogram_smoothed(
-    raster::SpikeRaster{T}, args...; norm=false, kwargs...
-) where {T<:Real}
+    raster::SpikeRaster{T}, proj::AbstractVector; norm=false, kwargs...
+) where {T}
     _flatten = reduce(vcat, raster; init=T[])
     _N = length(raster)
     if norm
-        spike_histogram_smoothed(_flatten, args...; norm=true, kwargs...)
+        spike_histogram_smoothed(_flatten, proj; norm=true, kwargs...)
     else
-        spike_histogram_smoothed(_flatten, args...; norm=false, kwargs...) ./ _N
+        spike_histogram_smoothed(_flatten, proj; norm=false, kwargs...) ./ _N
     end
 end
 
