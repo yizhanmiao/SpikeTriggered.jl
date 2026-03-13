@@ -1,6 +1,21 @@
-export GaussianEllipse, make_ellipse, make_heatmap
+export GaussianEllipse, area, make_ellipse, make_heatmap
 export srf_gaussian_fit
 
+@doc raw"""
+    GaussianEllipse{T}
+
+Ellipse representation for 2D gaussian fit result
+
+## Conversion:
+- `collect(e::GaussianEllipse)`: convert ellipse to a vector
+- `GaussianEllipse(param::Vector)`: convert the vector above back to an ellipse.
+
+## Functions:
+- `area(e::GaussianEllipse; sigma=1)`: get the ellipse area for a given sigma value.
+- `make_ellipse(e::GaussianEllipse)`: get the contour line for plotting
+- `make_heatmap(e::GaussianEllipse)`: get the 2d heatmap for plotting
+- `srf_schiller_overlap_index(e1, e2)`
+"""
 struct GaussianEllipse{T}
     amplitude::T
     axis_major::T
