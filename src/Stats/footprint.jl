@@ -2,7 +2,7 @@ export get_footprint_map, get_footprint_mask, collapse_footprint
 public benjamini_hochberg_constant
 
 @doc raw"""
-    get_footprint_map([func_pval,] raw::AbstractArray; alpha=0.01, fdr_c=:auto, collapse=false, gridsize=nothing)
+    get_footprint_map([func_pval,] raw::AbstractArray; alpha=0.01, fdr_c=:auto, collapse=true, gridsize=nothing)
 
 Create a footprint map based on the q-values from `func_pval(raw)`
 using Benjamini–Hochberg procedure; `alpha` as the threshold, fdr_c as the constant.
@@ -24,9 +24,17 @@ color codes as:
 - `-1`: OFF response
 """
 function get_footprint_map(
-    func_pval::Function, raw::AbstractArray; collapse=false, gridsize=nothing, kwargs...
+    func_pval::Function, raw::AbstractArray; collapse=true, gridsize=nothing, kwargs...
 )
-    @assert !(collapse && (gridsize isa Nothing)) "please specify gridsize to get collapsed footprint map"
+    gridsize = if collapse && gridsize isa Nothing
+        if ndims(raw) > 1
+            size(raw, 1)
+        else
+            throw(ArgumentError("please specify gridsize to get collapsed footprint map"))
+        end
+    else
+        gridsize
+    end
 
     _mask = get_footprint_mask(func_pval, raw; kwargs...)
     _map = sign.(_mask .* raw)
@@ -61,7 +69,7 @@ function collapse_footprint(fp; kwargs...)
 end
 
 @doc raw"""
-    get_footprint_mask([func_pval::Function,] raw::AbstractArray; alpha=0.01, fdr_c=1)
+    get_footprint_mask([func_pval::Function,] raw::AbstractArray; alpha=0.01, fdr_c=:auto)
 
 Create a binary footprint mask based with Benjamini–Hochberg procedure using arbiturary q-values
 converted from `raw` statistic values by `func_pval`.
@@ -96,6 +104,11 @@ end
 #TODO: docs
 #NOTE: when N > 50, the difference is less than 0.01
 #NOTE: when N > 2000, the `sum` starts to be significantly slower than the approximation
+@doc raw"""
+    benjamini_hochberg_constant(N::Integer)
+
+A constant value to correct for large samples.
+"""
 function benjamini_hochberg_constant(N::Integer)
     return N > 50 ? log(N) + Base.MathConstants.eulergamma + 1 / N : sum(x -> 1 / x, 1:N)
 end
