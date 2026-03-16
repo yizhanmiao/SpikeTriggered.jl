@@ -118,4 +118,4 @@ function trf_segment_statistics(trf::AbstractVector, segmentation::NamedTuple; )
     )
 end
 
-trf_segment_statistics(trf::AbstractVector; kwargs...) = trf_segment_statistics(trf, get_trf_segments_biphasic(trf; kwargs...))
+trf_segment_statistics(trf::AbstractVector; kwargs...) = trf_segment_statistics(trf, trf_segment_biphasic(trf; kwargs...))
