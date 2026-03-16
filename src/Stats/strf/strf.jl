@@ -40,7 +40,13 @@ strf_vstack(strfs...; kwargs...) = reduce(vcat, map(x->strf_hstack(x; kwargs...)
 @deprecate hstack_strf strf_hstack
 @deprecate make_strf strf_
 
-include("gaussian2dfit.jl")
 include("misc.jl")
-include("pixel_map.jl")
+
+# Spatial
+include("gaussian2dfit.jl")
 include("footprint.jl")
+include("pixel_map.jl")
+
+# Temporal
+include("temporal.jl")
+include("bright_dark_polarity.jl")
