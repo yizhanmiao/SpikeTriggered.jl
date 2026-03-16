@@ -40,7 +40,7 @@ include("correlogram.jl")
 include("spike_triggered_covariance.jl")
 
 # additional waveform related functions
-include("waveforms/Waveforms.jl")
+include("Waveforms/Waveforms.jl")
 
 # using Reexport: @reexport
 # @reexport using .Waveforms
