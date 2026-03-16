@@ -1,12 +1,6 @@
 export orientation_selectivity_index_global
 export direction_selectivity_index_global
 
-# function orientation_selectivity_index()
-# end
-
-# function direction_selectivity_index()
-# end
-
 @doc raw"""
     orientation_selectivity_index(resp::AbstractVector, theta::AbstractVector)
 
