@@ -2,44 +2,6 @@ export spike_histogram, get_histogram_center
 export spike_histogram_smoothed
 
 #### Binned PSTH
-
-@doc raw"""
-    histogram_gsl(u_arr, edges) where {T <: Real}
-
-Count histogram by providing the edges. If provides `n+1` edges,
-it would return `n` length histogram.
-Edges would work as: left bound <= value < right bound.
-
-# Arguments
-- `u_arr`: a vector of values
-- `edges`: a vector of edges
-
-Note: StatsBase.Histogram is slower than GSL but with less memory footprint.
-"""
-function histogram_gsl(u_arr::AbstractVector{T}, edges) where {T<:Real}
-    u_arr = Cdouble.(u_arr)
-    edges = Cdouble.(edges)
-
-    edges = sort(edges)
-
-    n = length(edges) - 1
-    gsl_hist = GSL.histogram_alloc(n)
-    GSL.histogram_set_ranges(gsl_hist, edges, n + 1)
-
-    for idx in eachindex(u_arr)
-        @inbounds GSL.histogram_increment(gsl_hist, u_arr[idx])
-    end
-
-    myhist = zeros(Int, n)
-    for idx in 1:n
-        @inbounds myhist[idx] = GSL.histogram_get(gsl_hist, idx - 1)
-    end
-
-    GSL.histogram_free(gsl_hist)
-
-    return myhist
-end
-
 @doc raw"""
     histogram_fhist(u_arr, edges; kwargs...) -> Vector
 
@@ -117,6 +79,8 @@ end
 get the center of edge vector. make sure edges are sorted.
 """
 get_histogram_center(edges::AbstractVector) = edges[1:(end - 1)] .+ diff(edges) ./ 2
+
+@deprecate histogram_gsl spike_histogram
 
 #### Smoothed PSTH
 

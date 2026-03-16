@@ -79,7 +79,7 @@ Keyword Arguments:
 """
 function image2dataset(image::AbstractMatrix; upsample=1, interp=Linear(), norm=false)
     gridsize = size(image)
-    _frm = interpolate(image, BSpline(interp), OnGrid())
+    _frm = interpolate(image, BSpline(interp))
     _sample_ind = [
         (xi, yi) for yi in 1:(1 / upsample):gridsize[2], xi in 1:(1 / upsample):gridsize[1]
     ]
@@ -210,3 +210,4 @@ function srf_gaussian_fit(
 end
 
 include("schiller_overlap.jl")
+# include("ellipse_overlap.jl")
