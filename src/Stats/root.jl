@@ -1,7 +1,6 @@
 # Spike Train Statistics
 module Stats
 
-using GSL: GSL
 using FFTW: FFTW
 using Random: randperm
 using Statistics: mean, var, std
@@ -14,7 +13,7 @@ using ToeplitzMatrices: Circulant
 using GeometryBasics: Point2
 using DSP: conv
 using Optim: optimize, NelderMead, Options as OptimOptions, minimizer
-using Interpolations: interpolate, BSpline, Linear, OnGrid
+using Interpolations: interpolate, BSpline, Linear, Quadratic
 
 const SpikeRaster{T} = AbstractVector{<:AbstractVector{T}}
 const AbstractSpikeTrain{T} = AbstractVector{T}

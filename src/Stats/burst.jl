@@ -1,9 +1,6 @@
-export burst_detect,
-    burst_detect_trn,
-    burst_detect_lgn,
-    split_tonic_burst,
-    split_tonic_cardinal,
-    burst_interpolate
+export burst_detect, burst_detect_trn, burst_detect_lgn
+export split_tonic_burst, split_tonic_cardinal
+export burst_interpolate
 
 @doc raw"""
     burst_detect(spk::Vector; t_silence=0.07, t_isi=0.03, nofs=nothing, keep_index=false) -> Vector{Vector{T}}
@@ -24,7 +21,7 @@ References:
 """
 function burst_detect(
     spk::AbstractSpikeTrain{T};
-    t_silence::Union{Real,NTuple{2,Real}}=0.07,
+    t_silence::Union{Real,NTuple{2,Real}}=(0.07, 0),
     t_isi::Real=0.03,
     nofs::Union{Nothing,Tuple{Integer,Real}}=nothing,
     keep_index=false,
@@ -83,14 +80,6 @@ function burst_detect(
                 end
             end
         end
-        # while !isempty(burst_list)
-        #     candidate = popfirst!(burst_list)
-        #     if length(candidate) >= nofs[1]
-        #         if sum(diff(candidate[1:nofs[1]])) <= nofs[2]
-        #             push!(output, candidate)
-        #         end
-        #     end
-        # end
         output, output_index
     else
         burst_list, burst_index_list
@@ -145,49 +134,28 @@ function split_tonic_cardinal(spk; detector=burst_detect, kwargs...)
 end
 
 @doc raw"""
-    interp_burst(burst_iti::AbstractVector; n=13, interp_t=:steffen) -> Vector{Float64}
-    interp_burst(bursts::Vector{Vector{Real}}; n=13, interp_t=:steffen) -> Matrix{Float64} [n x nBursts]
+    interp_burst(burst_iti::Vector{Vector{T}; n=13, degree=:Quadratic()) -> Matrix{T} [n x nBursts]
+    interp_burst(burst_iti::Vector{T}; n=13, interp_t=:steffen) -> Matrix{T} [n x 1]
 
 Make interpolation of burst inter-spike-interval to generate burst patterns.
 
-`n` set the interpolation bin length.
-`interp_t` set the type of interpolation, currently only supports
-[`:linear`, `:polynomial`, `:cspline`, `:steffen`].
-The results will always be in `Cdouble` precision.
+- `n` set the interpolation bin length.
+- `degree` set the type of interpolation, which is using the `Interpolations`
+
+The results will always be 2d matrix.
 """
-function burst_interpolate(burst_iti::AbstractVector; n=13, interp_t=:steffen)
-    N = length(burst_iti)
-    iti_list = Cdouble.(burst_iti)
-    output = zeros(Cdouble, n)
-
-    xa = collect(range(0, stop=1, length=N))
-    interp_type = if interp_t == :linear
-        GSL.gsl_interp_linear
-    elseif interp_t == :polynomial
-        GSL.gsl_interp_polynomial
-    elseif interp_t == :cspline
-        GSL.gsl_interp_cspline
-    else
-        GSL.gsl_interp_steffen
+function burst_interpolate(ISI::AbstractVector{<:AbstractVector{T}}; n=13, degree=Quadratic()) where {T}
+    output = zeros(T, n, length(ISI))
+    Threads.@threads for i in eachindex(ISI)
+        a = ISI[i]
+        len = length(a)
+        itp = interpolate(a, BSpline(degree))
+        stride = (len - 1) / (n - 1)
+        @inbounds for j in 1:n
+            output[j, i] = itp(1 + (j - 1) * stride)
+        end
     end
-
-    #TODO: maybe use GSL.gsl_spline instead.
-    interp_obj = GSL.interp_alloc(interp_type, N)
-    accel_obj = GSL.interp_accel_alloc()
-
-    GSL.interp_init(interp_obj, xa, iti_list, N)
-
-    for (idx, i) in enumerate(range(0, stop=1, length=n))
-        output[idx] = GSL.interp_eval(interp_obj, xa, iti_list, Cdouble(i), accel_obj)
-    end
-
-    GSL.interp_accel_free(accel_obj)
-    GSL.interp_free(interp_obj)
-
-    output
+    return output
 end
 
-function burst_interpolate(bursts::Vector{Vector}; kwargs...)
-    _iti_pattern = map(x -> burst_interpolate(x; kwargs...), map(diff, bursts))
-    reduce(hcat, _iti_pattern)
-end
+@deprecate burst_interpolate(burst_iti::AbstractVector{<:Real}; kwargs...) burst_interpolate([burst_iti]; kwargs...)
