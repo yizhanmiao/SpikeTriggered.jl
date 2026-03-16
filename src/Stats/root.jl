@@ -26,15 +26,14 @@ export SpikeRaster, AbstractSpikeTrain
 include("statistics.jl")
 include("raster.jl")
 include("psth.jl")
-include("spike_triggered_average.jl")
-include("footprint.jl")
+include("spike_triggered_average.jl") # reverse correlation
+include("forward_correlation.jl")
 include("burst.jl")
 include("spectrum.jl")
-include("strf/strf.jl")
 include("drifting_grating.jl")
+include("strf/strf.jl")
 
 #TODO: review the functions below and make documentations
-include("forward_correlation.jl")
 include("jpsth.jl")
 include("reliability.jl")
 include("correlogram.jl")
