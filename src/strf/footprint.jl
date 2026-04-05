@@ -143,7 +143,7 @@ end
 get pvalue from standard normal distribution
 """
 function zscore_pvalue(zscore::AbstractArray; two_tailed=true)
-    p = cdf(Normal(), -1 .* abs.(zscore))
+    p = map(Base.Fix1(cdf, Normal()), -1 .* abs.(zscore))
     return two_tailed ? 2 .* p : p
 end
 
