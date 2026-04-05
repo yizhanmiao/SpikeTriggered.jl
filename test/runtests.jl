@@ -1,5 +1,10 @@
 using Test
 using SpikeTriggered
+using Aqua
+
+@testset "Aqua" begin
+    Aqua.test_all(SpikeTriggered)
+end
 
 @testset "basics" begin
     @test true
