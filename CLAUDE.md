@@ -49,4 +49,7 @@ make coverage-report
 
 # Clean coverage artifacts
 make clean
+
+# start julia REPL with custom environment variables
+pixi run julia
 ```
