@@ -1,17 +1,17 @@
 @test begin
     spk = [0.1, 0.4, 0.402, 0.5]
-    bt = split_tonic_burst(spk; detector=burst_detect_lgn)
+    bt = spike_split_burst(spk; detector=spike_detect_burst_lgn)
     bt.tonic == [0.1, 0.5] && bt.burst == [[0.4, 0.402]]
 end
 
 @test begin
     spk = [0.1, 0.4, 0.402, 0.5]
-    bt = split_tonic_cardinal(spk; detector=burst_detect_lgn)
+    bt = spike_split_cardinal(spk; detector=spike_detect_burst_lgn)
     bt.tonic == [0.1, 0.5] && bt.burst == [0.4]
 end
 
 @test begin
     spk = [0.1, 0.4, 0.5]
-    bt = split_tonic_cardinal(spk; detector=burst_detect_lgn)
+    bt = spike_split_cardinal(spk; detector=spike_detect_burst_lgn)
     bt.tonic == [0.1, 0.4, 0.5] && bt.burst == []
 end

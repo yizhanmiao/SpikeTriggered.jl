@@ -1,38 +1,31 @@
 using Documenter
-
-if isnothing(get(ENV, "CI", nothing))
-    push!(LOAD_PATH, "../src/")
-
-    using Pkg: Pkg
-    Pkg.activate(joinpath(@__DIR__, ".."))
-    Pkg.resolve()
-    Pkg.instantiate()
-end
-
+using Literate
 using SpikeTriggered
+
+EXAMPLE = joinpath(@__DIR__, "src", "examples")
+
+Literate.markdown.([joinpath(EXAMPLE, "raster_psth.jl")],
+                   EXAMPLE;
+                   documenter=true)
+
+# include("changelog.jl")
+
+include("pages.jl")
 
 makedocs(;
     modules=[SpikeTriggered],
     sitename="SpikeTriggered.jl",
-    #  checkdocs=:exports,
     remotes=nothing,
+    checkdocs=:exports,
     format=Documenter.HTML(;
-        #   repolink="/dir?ci=SpikeTriggered.jl&name=SpikeTriggered.jl",
-        #   disable_git=true,
-        #   edit_link=nothing,
         prettyurls=get(ENV, "CI", nothing) == "true",
+        collapselevel=1,
+        repolink="https://taro-station.usc.edu:20443/AnalysisPipeline/SpikeTriggered.jl",
     ),
-    pages=[
-        "Home" => "index.md",
-        "Spike Statistics" => "spike_stats.md",
-        "Raster and PSTH" => "raster_psth.md",
-        "Reverse Correlation" => "reverse_correlation.md",
-        #    "Forward Correlation" => "forward_correlation.md",
-        "Spatiotemporal Receptive Field" => "strf.md",
-        "APIs" => "api.md",
-    ],
-)
+    pages=pages)
 
 if get(ENV, "CI", nothing) == "true"
-    deploydocs(; repo="github.com/ZaneMuir/SpikeTriggered.jl.git")
+    deploydocs(; repo="github.com/yizhanmiao/SpikeTriggered.jl.git")
+else
+    @info "You are build docs locally."
 end

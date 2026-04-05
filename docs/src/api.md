@@ -1,29 +1,13 @@
 # APIs
 
-## Stats
-
 ```@autodocs
-Modules = [
-    SpikeTriggered.Stats,
-    SpikeTriggered.Stats.SpatialRF,
-    ]
-Order   = [:function, :type]
+Modules = [SpikeTriggered]
+Order   = [:type, :function]
 ```
 
 ## Waveforms
 
 ```@autodocs
-Modules = [
-    SpikeTriggered.Waveforms
-    ]
-Order   = [:function, :type]
-```
-
-## Stimulus
-
-```@autodocs
-Modules = [
-    SpikeTriggered.Stimulus
-    ]
-Order   = [:function, :type]
+Modules = [SpikeTriggered.Waveforms]
+Order   = [:type, :function]
 ```

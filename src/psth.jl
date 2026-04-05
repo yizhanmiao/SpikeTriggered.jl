@@ -1,6 +1,3 @@
-export spike_histogram, get_histogram_center
-export spike_histogram_smoothed
-
 #### Binned PSTH
 @doc raw"""
     histogram_fhist(u_arr, edges; kwargs...) -> Vector
@@ -17,14 +14,19 @@ function histogram_fhist(u_arr::AbstractVector, edges; kwargs...)
 end
 
 @doc raw"""
-    spike_histogram(spike_train::AbstractVector{T}, edges::AbstractVector; dtype::Type, kwargs...) -> Vector{T}
+    spike_histogram(spike_train::AbstractSpikeTrain{T}, edges::AbstractVector; dtype=Float64, kwargs...) -> Vector
 
 Peri-stimulus time histogram.
 `edges` should be length of `n+1` to create a histogram of length `n`.
 
-If `spike_train` is empty, it will return `zeros(T, n)`
+If `spike_train` is empty, returns `zeros(dtype, n)`.
+If `T` is a floating-point type, `dtype` is ignored and `T` is used instead.
 
-If `counttype` is not specified, the returned vector will have same type `T`
+## Arguments
+- `spike_train`: vector of spike times.
+- `edges`: bin edges for the histogram.
+- `dtype`: element type of the output (default `Float64`); overridden by `T` when `T <: AbstractFloat`.
+- `kwargs...`: forwarded to `FHist.Hist1D`.
 """
 function spike_histogram(
     spk::AbstractSpikeTrain{T},
@@ -34,23 +36,25 @@ function spike_histogram(
 ) where {T}
     dtype = T <: AbstractFloat ? T : dtype
     if isempty(spk)
-        zeros(dtype, length(edges) - 1)
+        return zeros(dtype, length(edges) - 1)
     else
-        histogram_fhist(spk, edges; counttype=dtype, kwargs...)
+        return histogram_fhist(spk, edges; counttype=dtype, kwargs...)
     end
 end
 
 # markers can be 2d matrix with shape of [nEdges x nRepeats]
 # or specify the repeat dimension
 @doc raw"""
-    spike_histogram(spike_train, edges::AbstractMatrix; kwargs...) -> Matrix{T}
+    spike_histogram(spike_train::AbstractSpikeTrain, edges::AbstractMatrix; dims=2, kwargs...) -> Matrix
 
 Peri-stimulus time histogram with multiple trials.
-`edges` should be shape of [`n+1` x nRepeats] to create a histogram of shape [`n` x nRepeats].
+`edges` should be shape of `(n+1) × nRepeats` to create a histogram of shape `n × nRepeats`.
 
-If `dims` is specified, trial dimension will be overwrite.
-
-Additional `kwargs` will be passed to `spike_histogram`.
+## Arguments
+- `spike_train`: vector of spike times.
+- `edges`: bin-edge matrix; each slice along `dims` is one trial's edges.
+- `dims`: dimension along which to slice `edges` (default `2`).
+- `kwargs...`: forwarded to the single-trial `spike_histogram`.
 """
 function spike_histogram(spk::AbstractSpikeTrain, edges::AbstractMatrix; dims=2, kwargs...)
     return reduce(
@@ -59,11 +63,15 @@ function spike_histogram(spk::AbstractSpikeTrain, edges::AbstractMatrix; dims=2,
 end
 
 @doc raw"""
-    spike_histogram(raster::SpikeRaster{T}, args...; norm=true, kwargs...) -> VecOrMat{T}
+    spike_histogram(raster::SpikeRaster{T}, edges::AbstractVector; norm=true, kwargs...) -> Vector
 
 PSTH from averaging rasters.
 
-If `norm` is `true`, PSTH will be normalized by the length of trials.
+## Arguments
+- `raster`: collection of spike trains across trials.
+- `edges`: bin edges for the histogram.
+- `norm`: if `true` (default), divide counts by the number of trials.
+- `kwargs...`: forwarded to the single-train `spike_histogram`.
 """
 function spike_histogram(
     raster::SpikeRaster{T}, edges::AbstractVector; norm::Bool=true, kwargs...
@@ -74,35 +82,37 @@ function spike_histogram(
 end
 
 @doc raw"""
-    get_histogram_center(edges)
+    spike_histogram_center(edges::AbstractVector) -> AbstractVector
 
-get the center of edge vector. make sure edges are sorted.
+Compute the bin centres from a sorted edge vector.
+
+## Arguments
+- `edges`: sorted bin edges of length `n+1`.
+
+Returns a vector of length `n`.
 """
-get_histogram_center(edges::AbstractVector) = edges[1:(end - 1)] .+ diff(edges) ./ 2
-
-@deprecate histogram_gsl spike_histogram
+spike_histogram_center(edges::AbstractVector) = edges[1:(end - 1)] .+ diff(edges) ./ 2
 
 #### Smoothed PSTH
-
-@deprecate spike_filter(spk, proj, kernel; norm_by=nothing, kwargs...) spike_histogram_smoothed(
-    spk, proj, kernel; norm=isnothing(norm_by), kwargs...
-) false
-@deprecate spike_filter_gaussian(spk_or_raster, proj; kwargs...) spike_histogram_smoothed(
-    spk_or_raster, proj; kwargs...
-) false
-
 @doc raw"""
-    spike_histogram_smoothed(spike_train::SpikeTrain{T}, projection::AbstractArray, kernel::Function=gaussian_kernel; norm=true, kwargs...) -> Vector{T}
+    spike_histogram_smoothed(spike_train::AbstractSpikeTrain, proj::AbstractVector{T}, kernel=gaussian_kernel; norm=true, kwargs...) -> Vector{T}
 
-Generating smoothed curve from spike trains. Equivalent to convolution.
+Generate a smoothed PSTH by convolving spike times with a kernel function.
 
 ```math
 \text{PSTH}(t) = (h * s)(t) = \sum_i \delta(t - t'_i) h (t - t'_i),\; t \in \text{proj}
 ```
 
-If `norm` is `true`, the results will be normalized by the maximum value.
+## Arguments
+- `spike_train`: vector of spike times.
+- `proj`: time-projection axis (evaluation points).
+- `kernel`: smoothing kernel (default `gaussian_kernel`); called as `kernel(Δt; kwargs...)`.
+- `norm`: if `true` (default), normalise by the peak absolute value.
+- `kwargs...`: forwarded to `kernel`.
 
-All `kwargs` will be passed to `kernel` function.
+!!! note
+    This function uses `@floop` internally and benefits from multi-threading.
+    Start Julia with multiple threads (e.g. `julia -tauto`) for faster execution.
 """
 function spike_histogram_smoothed(
     spk::AbstractSpikeTrain,
@@ -120,23 +130,22 @@ function spike_histogram_smoothed(
 end
 
 @doc raw"""
-    spike_histogram_smoothed(raster, args...; kwargs...) where {T <: Real} -> Vector{T}
+    spike_histogram_smoothed(raster::SpikeRaster{T}, proj::AbstractVector; norm=false, kwargs...) -> Vector
 
-Generating smoothed PSTH from rasters.
+Generate a smoothed PSTH from rasters.
 
-If `norm` is `true`, PSTH will be normalized to the maximum number;
-otherwise, it will be divided by the number of trials in the raster.
+## Arguments
+- `raster`: collection of spike trains across trials.
+- `proj`: time-projection axis (evaluation points).
+- `norm`: if `true`, normalise by peak absolute value; if `false` (default), divide by the number of trials.
+- `kwargs...`: forwarded to the single-train `spike_histogram_smoothed`.
 """
 function spike_histogram_smoothed(
     raster::SpikeRaster{T}, proj::AbstractVector; norm=false, kwargs...
 ) where {T}
     _flatten = reduce(vcat, raster; init=T[])
-    _N = length(raster)
-    if norm
-        spike_histogram_smoothed(_flatten, proj; norm=true, kwargs...)
-    else
-        spike_histogram_smoothed(_flatten, proj; norm=false, kwargs...) ./ _N
-    end
+    _psth = spike_histogram_smoothed(_flatten, proj; norm, kwargs...)
+    return norm ? _psth : _psth ./ length(raster)
 end
 
 @doc raw"""

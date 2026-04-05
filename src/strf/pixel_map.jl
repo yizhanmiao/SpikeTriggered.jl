@@ -1,18 +1,16 @@
-export get_pixel_cloud
-public get_filtered_strf, get_filtered_mask_full
-
 @doc raw"""
     get_filtered_strf(strfs...; s=3)
 
-Perform a running average (3x3 by default, change `s` to have a different size)
-on each strf input; and normalized by the common absolute maximum value.
+Smooth each SRF with an `s × s` running-average kernel and normalise jointly by the
+common absolute maximum.
 
-### example
-```julia
-(s_on, s_off) = get_filtered_strf(frame_on, frame_off)
-```
+## Arguments
+- `strfs...`: one or more 2D spatial receptive field matrices.
+- `s`: kernel size (default `3`).
 
-SEE ALSO: `get_filtered_mask_full` and `get_filtered_pixel_map`
+Returns a tuple of smoothed, jointly normalised matrices.
+
+See also: [`get_filtered_mask_full`](@ref), [`srf_pixel_cloud`](@ref).
 """
 function get_filtered_strf(strfs...; s=3)
     strf_smoothed = map(i->conv(i, ones(s, s)./(s*s))[2:end-1, 2:end-1], strfs)
@@ -22,52 +20,48 @@ function get_filtered_strf(strfs...; s=3)
 end
 
 @doc raw"""
-    get_filtered_mask_full(strfs...)
+    get_filtered_mask_full(strfs...; kwargs...)
 
-return binary masks of elements larger than the half maximum.
+Create binary masks of elements exceeding half the joint maximum.
 
-In most cases, you should use `get_filtered_pixel_map`.
+## Arguments
+- `strfs...`: one or more 2D SRF matrices.
+- `kwargs...`: forwarded to `get_filtered_strf`.
+
+In most cases, prefer [`srf_pixel_cloud`](@ref) which additionally applies flood-fill
+connectivity.
 """
 function get_filtered_mask_full(strfs... ; kwargs...)
     return map(i -> abs.(i) .> 0.5, get_filtered_strf(strfs...; kwargs...))
 end
 
 @doc raw"""
-    get_filtered_pixel_map(strfs...; connectivity=4, s=3)
+    srf_pixel_cloud(strfs::AbstractMatrix...; connectivity=4, s=3)
 
-Mimicing the behavior from [1], where on and off maps are filtered
-and thresholded by 50% of the maximum; and only keep those pixels that
-have direct connections with the maximum pixel.
+Filter and threshold SRFs at 50% of the joint maximum, then keep only
+pixels connected to the peak pixel via flood fill.
 
-The outputs are binary matrices.
-                                         
 ## Arguments
+- `strfs...`: 2D SRF matrices; processed collectively to find the joint maximum.
+- `connectivity`: flood-fill connectivity, `4` or `8` (default `4`).
+- `s`: moving-average kernel size (default `3`).
 
-- `strfs...`: frames of STAs; they will be used collectively to find the maximum value.
-Make sure they are in 2D matrix format.
-
-## Keyword Arguments
-
-- `connectivity=4`: the final connection is using `flood fill` algorithm.
-It can be either 4-way or 8-way connection.
-- `s=3`: moving average kernel size.
+Returns a tuple of binary masks, one per input.
 
 ## Examples
-
 ```julia
-# process the on and off map together so the joint maximum value is used.
-(mask_on, mask_off) = get_filtered_pixel_map(frame_on, frame_off)
-
-# even with one input frame, the output is a one-element tuple.
-(mask,) = get_filtered_pixel_map(frame)
+(mask_on, mask_off) = srf_pixel_cloud(frame_on, frame_off)
+(mask,) = srf_pixel_cloud(frame)
 ```
 
-1. Müllner, F. E. & Roska, B. Individual thalamic inhibitory interneurons are functionally specialized toward distinct visual features. Neuron 112, 2765-2782.e9 (2024).
+## References
+- Müllner, F. E. & Roska, B. Individual thalamic inhibitory interneurons are functionally
+  specialized toward distinct visual features. *Neuron* 112, 2765–2782.e9 (2024).
 """
-function get_pixel_cloud(strfs::AbstractMatrix...; connectivity=4, s=3)
+function srf_pixel_cloud(strfs::AbstractMatrix...; connectivity=4, s=3)
     filtered_map = get_filtered_strf(strfs...; s)
     mask = get_filtered_mask_full(strfs...; s)
-    
+
     initnode = let
         tmp = map(i->findmax(abs.(i)), filtered_map)
         argmax(i->i[1], tmp)[2]
@@ -76,5 +70,3 @@ function get_pixel_cloud(strfs::AbstractMatrix...; connectivity=4, s=3)
     _tmp = map(i->floodfill!(collect(Int8, i), initnode, 1, 9; connectivity), mask)
     return map(i->i .== 9, _tmp)
 end
-
-@deprecate get_filtered_pixel_map(args...; kwargs...) get_pixel_cloud(args...; kwargs...)

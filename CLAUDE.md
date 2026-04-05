@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Do not re-read files you have already read in this session.
 - Correctness and clarity first. Only optimise for performance when explicitly asked or when the issue is egregious.
 - Explicit `return` at every exit point of a `function ... end` definition.
-- Docstrings on every exported symbol using `@doc raw"""..."""` (not plain `"""`). Cover: what, args, return value. No docstrings needed on _-prefixed internals.
+- Docstrings on every exported and public symbol using `@doc raw"""..."""` (not plain `"""`). Cover: what, args, return value. No docstrings required on _-prefixed internals.
 - Only "why" comments — never describe what the code does; the code should be self-evident.
 - Functional style over imperative loops. Prefer `map`, `filter`, `reduce`, broadcasting (`.`), and `|>` pipelines; use `for` only when clearly more readable.
 - Descriptive error handling. Always `throw(...)` with context; never silently discard errors or return `nothing` on failure.
