@@ -3,7 +3,7 @@
 Manifest.toml
 .ipynb_checkpoints/
 dev/
-devs/
+playground/
 
 *.log
 *.so
@@ -18,3 +18,5 @@ docs/build/
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+
+coverage-report/
