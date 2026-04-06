@@ -25,7 +25,7 @@ Pkg.add(url="https://github.com/yizhanmiao/SpikeTriggered.jl.git")
 
 or through REPL
 ```julia
->>> ] add https://github.com/yizhanmiao/SpikeTriggered.jl.git
+julia> ] add https://github.com/yizhanmiao/SpikeTriggered.jl.git
 ```
 
 ## Quick Start
