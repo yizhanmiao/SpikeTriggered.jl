@@ -95,4 +95,21 @@ include("Waveforms/Waveforms.jl")
 # using Reexport: @reexport
 # @reexport using .Waveforms
 
+# Deprecated names
+@deprecate burst_detect spike_detect_burst
+@deprecate burst_detect_trn spike_detect_burst_trn
+@deprecate burst_detect_lgn spike_detect_burst_lgn
+@deprecate split_tonic_burst spike_split_burst
+@deprecate split_tonic_cardinal spike_split_burst_cardinal
+@deprecate burst_interpolate spike_burst_pattern
+@deprecate orientation_selectivity_index_global osi_global
+@deprecate direction_selectivity_index_global dsi_global
+@deprecate event_triggered_raster spike_raster_groupby
+@deprecate get_histogram_center spike_histogram_center
+@deprecate spike_triggered_average_suite spike_triggered_average_rectified
+@deprecate get_trf_polarity_score trf_polarity_score
+@deprecate get_footprint_map srf_footprint
+@deprecate get_footprint_mask srf_footprint_mask
+@deprecate get_pixel_cloud srf_pixel_cloud
+
 end
