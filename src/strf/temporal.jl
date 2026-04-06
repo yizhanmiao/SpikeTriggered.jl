@@ -1,18 +1,16 @@
 ## Temporal receptive fields
-export trf_segment_biphasic, trf_segment_statistics
-#TODO: export trf_isbiphasic
 
 find_zero_crossing(trace) = findall(diff(signbit.(trace)) .!= 0)
 
 function samesign_neighbor_until(trace, initnode, step=1)
     mysign = signbit(trace[initnode])
-    
+
     N = length(trace)
     cursor = initnode + step
-    
+
     while true
         ((cursor < 1) || (cursor > N)) && return cursor - step
-    
+
         signbit(trace[cursor]) == mysign || return cursor - step
         cursor += step
     end
@@ -26,36 +24,35 @@ biphasic_rank_cor(trace, troi, proi) = begin
 end
 
 @doc raw"""
-    trf_segment_biphasic(trf; by=biphasic_rank_energy)
-This function will segment tSTA into a `triggering` phase and a `priming` phase.
-TRF is assumed mean-subtracted already, that positive values will be treated as ON responses and negative values as OFF.
-If `trf` does not have a `priming` phase, a `ArgumentError` will throw.
+    trf_segment_biphasic(trf::AbstractVector; by=biphasic_rank_energy)
 
-`by` option is setting how to compare different possible pairs of triggering/priming phases.
-- `biphasic_rank_cor`: use overall correlation-coefficient with the raw trace (used by Ulas)
-- `biphasic_rank_energy`: use squared sum (default, simpler and essentially same results)
+Segment a temporal receptive field into a `triggering` phase and a `priming` phase.
+The TRF is assumed to be mean-subtracted (positive = ON, negative = OFF).
 
-It returns a NamedTuple of different ranges:
-- triggering
-- priming
+## Arguments
+- `trf`: mean-subtracted temporal receptive field vector.
+- `by`: ranking function to select the best triggering/priming pair.
+  - `biphasic_rank_energy` — squared sum (default).
+  - `biphasic_rank_cor` — correlation with the raw trace.
+
+Returns `(; triggering, priming)` where each value is an index range.
+
+Throws `ArgumentError` if no zero crossing is found.
 """
 function trf_segment_biphasic(trf::AbstractVector; by=biphasic_rank_energy)
     # indices with zero crossing following
     # e.g., if it returns [2], then the crossing is between [2, 3].
-    zero_crossing_ind0 = find_zero_crossing(trf) 
+    zero_crossing_ind0 = find_zero_crossing(trf)
 
-    ## no zero crossing found 
+    ## no zero crossing found
     isempty(zero_crossing_ind0) && throw(ArgumentError("no zero crossing found, please make sure it is z-scored or properly mean-shifted!"))
 
     ## found all putative triggering-priming pairs
-    tp_pairs = []
-    for ind0 in zero_crossing_ind0
+    tp_pairs = map(zero_crossing_ind0) do ind0
         triggering_start = samesign_neighbor_until(trf, ind0, -1)
-        triggering_end = ind0
         priming_start = ind0 + 1
         priming_end = samesign_neighbor_until(trf, priming_start, 1)
-
-        push!(tp_pairs, (triggering_start:triggering_end, priming_start:priming_end))
+        (triggering_start:ind0, priming_start:priming_end)
     end
 
     ## pick one that has the largest ranking value
@@ -68,35 +65,38 @@ function trf_segment_biphasic(trf::AbstractVector; by=biphasic_rank_energy)
 end
 
 @doc raw"""
-    get_trf_statistics(trf, [segmentation]; kwargs...)
+    trf_segment_statistics(trf::AbstractVector, segmentation::NamedTuple)
+    trf_segment_statistics(trf::AbstractVector; kwargs...)
 
-extract some basic statistics for each phases, including:
-- `roi`
-- `start` index
-- `stop` index
-- `peak` index
-- `amplitude` value
-- `magnitude` value
+Extract statistics for each phase of a biphasic TRF segmentation.
+
+## Arguments
+- `trf`: temporal receptive field vector.
+- `segmentation`: output of `trf_segment_biphasic` (or computed automatically via `kwargs`).
+
+Returns a named tuple with `trace`, `zerocrossing`, and per-phase statistics
+(`roi`, `start`, `stop`, `peak`, `amplitude`, `magnitude`) for `triggering`
+and `priming`.
 """
 function trf_segment_statistics(trf::AbstractVector, segmentation::NamedTuple; )
     N = length(trf)
-    
+
     get_crossing_offset(trf, start, stop) = (stop-start) * trf[start] / (trf[start] - trf[stop])
 
     t0 = first(segmentation.triggering)
     t_start = t0 == 1 ? 1 : t0 + get_crossing_offset(trf, t0, t0 - 1)
-    
+
     t1 = last(segmentation.triggering)
     p0 = first(segmentation.priming)
     zerocrossing = t1 + get_crossing_offset(trf, t1, p0)
 
     p1 = last(segmentation.priming)
     p_end = p1 == N ? N : p1 + get_crossing_offset(trf, p1, p1 + 1)
-    
+
     (t_amplitude, t_peak) = findmax(abs, trf[segmentation.triggering])
     (p_amplitude, p_peak) = findmax(abs, trf[segmentation.priming])
 
-    (;
+    return (;
         trace = trf,
         zerocrossing,
         triggering = (;

@@ -3,7 +3,7 @@
 !!! warning
     This documentation is still work in progress.
 
-The [SpikeTriggered](https://github.com/ZaneMuir/SpikeTriggered.jl) package provides a collection of functions for analysis related to spike trains. Including:
+The [SpikeTriggered](https://github.com/yizhanmiao/SpikeTriggered.jl) package provides a collection of functions for analysis related to spike trains. Including:
 
 - converting spike trains into rasters.
 - getting PSTH from spike trains, by using histogram or (Gaussian) filter.
@@ -21,5 +21,3 @@ Functions in the `Stimulus` submodule are only for internal uses in HirschLab.
 PSTHs and rasters are usually the foundation of all the analysis; so please double check
 your marker times are correct (e.g., there might be some jitters during stimulus generation,
 or there might be an offset between the marker and spike times between the stimulus generator and data collection).
-
-For visualization, checkout the [`NeuroMakie.jl`](https://github.com/ZaneMuir/NeuroMakie.jl) package.

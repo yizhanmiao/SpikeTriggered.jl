@@ -1,20 +1,18 @@
-export GaussianEllipse, area, make_ellipse, make_heatmap
-export srf_gaussian_fit
-
 @doc raw"""
     GaussianEllipse{T}
 
-Ellipse representation for 2D gaussian fit result
+Ellipse representation of a 2D Gaussian fit result.
 
-## Conversion:
-- `collect(e::GaussianEllipse)`: convert ellipse to a vector
-- `GaussianEllipse(param::Vector)`: convert the vector above back to an ellipse.
+## Fields
+- `amplitude`, `axis_major`, `axis_minor`, `center_x`, `center_y`, `rotation`
+- `bias::Union{T,Nothing}` — optional additive bias term.
 
-## Functions:
-- `area(e::GaussianEllipse; sigma=1)`: get the ellipse area for a given sigma value.
-- `make_ellipse(e::GaussianEllipse)`: get the contour line for plotting
-- `make_heatmap(e::GaussianEllipse)`: get the 2d heatmap for plotting
-- `srf_schiller_overlap_index(e1, e2)`
+## Conversion
+- `collect(e)` — parameter vector; `GaussianEllipse(vec)` reconstructs.
+
+## Related functions
+- [`area`](@ref), [`make_ellipse`](@ref), [`make_heatmap`](@ref),
+  [`srf_schiller_overlap_index`](@ref).
 """
 struct GaussianEllipse{T}
     amplitude::T
@@ -33,6 +31,19 @@ struct GaussianEllipse{T}
     GaussianEllipse(param::AbstractArray{T}) where {T} = GaussianEllipse(param...)
 end
 
+@doc raw"""
+    area(e::GaussianEllipse; sigma=1) -> Real
+
+Area of the ellipse at the given sigma contour.
+
+```math
+A = \sigma^2 \, \sigma_a \, \sigma_b \, \pi
+```
+
+## Arguments
+- `e::GaussianEllipse`: ellipse to compute the area of.
+- `sigma`: contour level in standard deviations (default `1`).
+"""
 area(e::GaussianEllipse; sigma=1) = abs2(sigma) * e.axis_major * e.axis_minor * π
 function Base.collect(e::GaussianEllipse)
     _rez = [e.amplitude, e.axis_major, e.axis_minor, e.center_x, e.center_y, e.rotation]
@@ -42,12 +53,37 @@ function Base.collect(e::GaussianEllipse)
     return _rez
 end
 
+@doc raw"""
+    make_ellipse(e::GaussianEllipse; reversed=true, σ=1, step=100) -> Vector{Point2}
+
+Generate a polygon (vector of `Point2`) tracing the ellipse contour of a
+[`GaussianEllipse`](@ref), suitable for plotting.
+
+## Arguments
+- `e::GaussianEllipse`: ellipse to trace.
+- `reversed`: negate the rotation angle for image-coordinate systems where the
+  y-axis points downward (default `true`).
+- `σ`: contour level in standard deviations (default `1`).
+- `step`: number of points on the polygon (default `100`).
+"""
 function make_ellipse(e::GaussianEllipse; reversed=true, kwargs...)
     #NOTE: rotation is inverted, because the y-axis is reversed during visualization
     θ = reversed ? e.rotation * -1 : e.rotation
     return _make_ellipse(e.axis_major, e.axis_minor, θ, e.center_x, e.center_y; kwargs...)
 end
 
+@doc raw"""
+    make_heatmap(e::GaussianEllipse; xrange=1:16, yrange=nothing) -> Matrix
+
+Evaluate the 2D Gaussian on a grid to produce a heatmap matrix.
+
+## Arguments
+- `e::GaussianEllipse`: Gaussian ellipse to evaluate.
+- `xrange`: x-axis grid coordinates (default `1:16`).
+- `yrange`: y-axis grid coordinates (default same as `xrange`).
+
+Returns a matrix of size `length(yrange) × length(xrange)`.
+"""
 function make_heatmap(e::GaussianEllipse; xrange=1:16, yrange=nothing)
     (A, σx, σy, x0, y0, θ) = collect(e)[1:6]
     _func = gaussian_2d(; A, σx, σy, x0, y0, θ)
@@ -67,15 +103,17 @@ function _make_ellipse(a, b, θ, x0, y0; σ=1, step=100)
 end
 
 @doc raw"""
-    image2dataset(image::AbstractMatrix; upsample=1, interp=Linear(), norm=false) -> ([X Y], [Z])
+    image2dataset(image::AbstractMatrix; upsample=1, interp=Linear(), norm=false) -> (X, Y)
 
-convert 2d image into matrix of `(x, y)` coordinates and matrix of elements (`z`).
-Primarilly used for 2d gaussian fit.
+Convert a 2D image into `(x, y)` coordinate–value pairs for 2D Gaussian fitting.
 
-Keyword Arguments:
-- upsample: ratio of upsampling, default as `1`` (i.e. no upsampling)
-- interp: upsampling method, default as `Linear()`` (using the `Interpolations.jl` package)
-- norm: flag to normalize the image value by its maximum, default as `false`
+## Arguments
+- `image`: 2D matrix to convert.
+- `upsample`: upsampling ratio (default `1`, i.e. no upsampling).
+- `interp`: interpolation method from `Interpolations.jl` (default `Linear()`).
+- `norm`: normalise values by the absolute maximum (default `false`).
+
+Returns `(X, Y)` where `X` is a matrix of `(x, y)` tuples and `Y` the corresponding values.
 """
 function image2dataset(image::AbstractMatrix; upsample=1, interp=Linear(), norm=false)
     gridsize = size(image)
@@ -118,14 +156,14 @@ function gaussian_2d_param_interp(; a, b, c)
     θ = atan(2b / (a - c)) / 2
     σx = 1 / sqrt(2(a * cos(θ)^2 + 2b * cos(θ)sin(θ) + c * sin(θ)^2))
     σy = 1 / sqrt(2(a * sin(θ)^2 - 2b * cos(θ)sin(θ) + c * cos(θ)^2))
-    (θ, σx, σy)
+    return (θ, σx, σy)
 end
 
 function gaussian_2d_param_proj(; θ, σx, σy)
     a = cos(θ)^2 / (2 * σx^2) + sin(θ)^2 / (2 * σy^2)
     b = -sin(θ)cos(θ) / (2 * σx^2) + sin(θ)cos(θ) / (2 * σy^2)
     c = sin(θ)^2 / (2 * σx^2) + cos(θ)^2 / (2 * σy^2)
-    (a, b, c)
+    return (a, b, c)
 end
 
 function _loss_srf_gaussian_fit_least_square(X, Y)
@@ -138,29 +176,21 @@ function _loss_srf_gaussian_fit_least_square(X, Y)
 end
 
 @doc raw"""
-    srf_gaussian_fit(
-        srf::AbstractMatrix{T};
-        norm=false, upsample=1, interp=Linear(),
-        optim_algorithm=NelderMead(),
-        optim_option=OptimOptions(),
-        param_init=nothing,
-        bias=false,
-        dev=false,
-        verbose=false,
-    ) -> GaussianEllipse{T}
+    srf_gaussian_fit(srf::AbstractMatrix{T}; kwargs...) -> GaussianEllipse{T}
 
-2D Gaussian fit of one spatial receptive field heatmap.
+Fit a 2D Gaussian to a spatial receptive field heatmap via least-squares optimisation.
 
-Keyword Arguments:
-- norm: flag to normalize the image value by its maximum, default as `false`
-- upsample: ratio of upsampling, default as `1`` (i.e. no upsampling)
-- interp: upsampling method, default as `Linear()`` (using the `Interpolations.jl` package)
-- optim_algorithm: optimization algorithm from `Optim.jl`, default as `NelderMead()` (which should be the same algorithm of `fminsearch` in MATLAB)
-- optim_option: Optim.Options
-- param_init: initial parameters to overwrite the default method.
-- bias: flag to include a bias term in the 2D Gaussian function, default as `false`.
-- dev: flag to return the Optim result, otherwise return a GaussianEllipse object, default as `false`.
-- verbose: to print optimization output, default as `false`.
+## Arguments
+- `srf`: 2D SRF matrix.
+- `norm`: normalise by absolute maximum (default `false`).
+- `upsample`: upsampling ratio (default `1`).
+- `interp`: interpolation method from `Interpolations.jl` (default `Linear()`).
+- `optim_algorithm`: `Optim.jl` algorithm (default `NelderMead()`).
+- `optim_option`: `Optim.Options` for the solver.
+- `param_init`: override default initial parameters.
+- `bias`: include a bias term in the Gaussian (default `false`).
+- `dev`: return the raw `Optim` result instead of a `GaussianEllipse` (default `false`).
+- `verbose`: print optimisation output (default `false`).
 """
 function srf_gaussian_fit(
     srf::AbstractMatrix{T};
@@ -198,13 +228,13 @@ function srf_gaussian_fit(
     verbose && (@show rez)
 
     if dev
-        rez
+        return rez
     else
         _param = minimizer(rez)
         if length(_param) == 6
-            GaussianEllipse(_param..., nothing)
+            return GaussianEllipse(_param..., nothing)
         else
-            GaussianEllipse(_param...)
+            return GaussianEllipse(_param...)
         end
     end
 end

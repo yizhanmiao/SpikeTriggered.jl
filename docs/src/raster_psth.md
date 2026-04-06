@@ -60,7 +60,7 @@ Essentially, it is a convolution over time steps provided by `projection::Abstra
 ```
 
 where `h` is the kernel function, $t'_i$ is the spike time.
-By default, it uses a Gaussian kernel function ([`Stats.gaussian_kernel`](@ref)).
+By default, it uses a Gaussian kernel function ([`SpikeTriggered.gaussian_kernel`](@ref)).
 
 ```julia
 # Gaussian kernel with default sigma = 0.005
@@ -80,22 +80,3 @@ spike_histogram_smoothed(spike_or_raster, projection; σ=0.010)
 !!! note
     There is also a `norm=true` flag, to normalize the PSTH by its maximum value,
     so the PSTH will be between `[0, 1]`.
-
-## Functions
-
-### exported functions
-
-```@docs
-spike_raster
-spike_histogram
-spike_histogram_smoothed
-```
-
-### utility functions
-
-```@docs
-Stats.gaussian_kernel
-Stats.get_histogram_center
-Stats.histogram_fhist
-Stats.histogram_gsl
-```

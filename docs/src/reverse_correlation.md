@@ -27,11 +27,3 @@ TODO
 ## References
 
 [^schwartzSpiketriggeredNeuralCharacterization2006]: Schwartz, O., Pillow, J. W., Rust, N. C. & Simoncelli, E. P. Spike-triggered neural characterization. Journal of Vision 6, 484–507 (2006).
-
-## Functions
-
-### exported functions
-
-```@docs
-spike_triggered_average
-```

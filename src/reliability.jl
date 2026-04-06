@@ -24,6 +24,6 @@ function schreiber_score_raster(
     _start = floor(minimum(x->minimum(x; init=Inf), raster) / step)
     _end = ceil(maximum(x->maximum(x; init=(-Inf)), raster) / step)
     _trange = collect(T, range(_start; stop=_end, step))
-    _psth = map(x->spike_filter_gaussian(x, _trange; σ), raster)
+    _psth = map(x->spike_histogram_smoothed(x, _trange; σ), raster)
     schreiber_score_matrix(reduce(hcat, _psth))
 end

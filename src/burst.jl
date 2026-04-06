@@ -1,9 +1,5 @@
-export burst_detect, burst_detect_trn, burst_detect_lgn
-export split_tonic_burst, split_tonic_cardinal
-export burst_interpolate
-
 @doc raw"""
-    burst_detect(spk::Vector; t_silence=0.07, t_isi=0.03, nofs=nothing, keep_index=false) -> Vector{Vector{T}}
+    spike_detect_burst(spk::AbstractSpikeTrain; t_silence=(0.07, 0), t_isi=0.03, nofs=nothing, keep_index=false) -> Vector{Vector{T}}
 
 Burst firing identification based on the rules:
 
@@ -19,7 +15,7 @@ otherwise, the spike times will be returned.
 References:
 - [Vaingankar et al 2012](https://doi.org/10.3389/fnint.2012.00118)
 """
-function burst_detect(
+function spike_detect_burst(
     spk::AbstractSpikeTrain{T};
     t_silence::Union{Real,NTuple{2,Real}}=(0.07, 0),
     t_isi::Real=0.03,
@@ -70,81 +66,75 @@ function burst_detect(
     end
 
     rez = if !isnothing(nofs)
-        output = Vector{T}[]
-        output_index = Vector{Int64}[]
-        for (burst, burst_index) in zip(burst_list, burst_index_list)
-            if length(burst) >= nofs[1]
-                if sum(diff(burst[1:nofs[1]])) <= nofs[2]
-                    push!(output, burst)
-                    push!(output_index, burst_index)
-                end
-            end
+        _mask = map(burst_list) do burst
+            length(burst) >= nofs[1] && sum(diff(burst[1:nofs[1]])) <= nofs[2]
         end
-        output, output_index
+        burst_list[_mask], burst_index_list[_mask]
     else
         burst_list, burst_index_list
     end
 
-    keep_index ? rez[2] : rez[1]
+    return keep_index ? rez[2] : rez[1]
 end
 
 @doc raw"""
-    detect_burst_trn(spk; kwargs...)
+    spike_detect_burst_trn(spk; kwargs...)
 
 ≥5 spikes within 70 ms, spaced ≤30 ms apart following ≥70 ms
 of silence; bursts were terminated when the interspike interval
 exceeded 30 ms, Figure 1B. Thus defined, typical bursts had 5–17
 spikes. Typical bursts lasted between 70 and 100 ms.
 """
-burst_detect_trn(spk; kwargs...) = burst_detect(
+spike_detect_burst_trn(spk; kwargs...) = spike_detect_burst(
     spk; t_silence=(0.070, 0.0), t_isi=0.030, nofs=(5, 0.07), kwargs...
 )
 
 @doc raw"""
-    detect_burst_lgn(spk; kwargs...)
+    spike_detect_burst_lgn(spk; kwargs...)
 
 Bursts were defined as two or more spikes, each spaced ≤4 ms apart following ≥100 ms of
 silence, bursts rarely lasted more than 10 ms for LGN.
 """
-burst_detect_lgn(spk; kwargs...) = burst_detect(
+spike_detect_burst_lgn(spk; kwargs...) = spike_detect_burst(
     spk; t_silence=(0.100, 0.0), t_isi=0.004, nofs=nothing, kwargs...
 )
 
 @doc raw"""
-    split_tonic_burst(spk; detector, kwargs...) -> (; burst::Vector{Vector}, tonic::Vector)
+    spike_split_burst(spk; detector, kwargs...) -> (; burst::Vector{Vector}, tonic::Vector)
 
 Split spike train into burst and tonic groups using `detector` function.
 """
-function split_tonic_burst(spk; detector=burst_detect, kwargs...)
+function spike_split_burst(spk; detector=spike_detect_burst, kwargs...)
     _burst_idx = detector(spk; keep_index=true, kwargs...)
     _spk = deepcopy(spk)
     splice!(_spk, reduce(vcat, _burst_idx; init=Int64[]))
-    (; burst=map(x -> spk[x], _burst_idx), tonic=_spk)
+    return (; burst=map(x -> spk[x], _burst_idx), tonic=_spk)
 end
 
 @doc raw"""
-    split_tonic_cardinal(spk; detector, kwargs...) -> (; burst::Vector, tonic::Vector)
+    spike_split_burst_cardinal(spk; detector, kwargs...) -> (; burst::Vector, tonic::Vector)
 
 Split spike train into burst and tonic groups using `detector` function.
 But only the cardinal spike of burst is returned.
 """
-function split_tonic_cardinal(spk; detector=burst_detect, kwargs...)
-    tmp = split_tonic_burst(spk; detector, kwargs...)
-    (; tmp..., burst=map(first, tmp.burst))
+function spike_split_burst_cardinal(spk; detector=spike_detect_burst, kwargs...)
+    tmp = spike_split_burst(spk; detector, kwargs...)
+    return (; tmp..., burst=map(first, tmp.burst))
 end
 
 @doc raw"""
-    interp_burst(burst_iti::Vector{Vector{T}; n=13, degree=:Quadratic()) -> Matrix{T} [n x nBursts]
-    interp_burst(burst_iti::Vector{T}; n=13, interp_t=:steffen) -> Matrix{T} [n x 1]
+    spike_burst_pattern(ISI::AbstractVector{<:AbstractVector{T}}; n=13, degree=Quadratic()) -> Matrix{T}
 
-Make interpolation of burst inter-spike-interval to generate burst patterns.
+Interpolate burst inter-spike-intervals onto a common grid to generate comparable burst patterns.
 
-- `n` set the interpolation bin length.
-- `degree` set the type of interpolation, which is using the `Interpolations`
+## Arguments
+- `ISI`: vector of ISI vectors, one per burst.
+- `n`: number of interpolation points (default `13`).
+- `degree`: B-spline degree for interpolation (default `Quadratic()`).
 
-The results will always be 2d matrix.
+Returns an `n × length(ISI)` matrix.
 """
-function burst_interpolate(ISI::AbstractVector{<:AbstractVector{T}}; n=13, degree=Quadratic()) where {T}
+function spike_burst_pattern(ISI::AbstractVector{<:AbstractVector{T}}; n=13, degree=Quadratic()) where {T}
     output = zeros(T, n, length(ISI))
     Threads.@threads for i in eachindex(ISI)
         a = ISI[i]
@@ -157,5 +147,3 @@ function burst_interpolate(ISI::AbstractVector{<:AbstractVector{T}}; n=13, degre
     end
     return output
 end
-
-@deprecate burst_interpolate(burst_iti::AbstractVector{<:Real}; kwargs...) burst_interpolate([burst_iti]; kwargs...)
