@@ -38,9 +38,14 @@ function trf_polarity_score(data; thresh=0.8, reverse_off=true)
     end
     trf = (data.on, data.off)
 
+    #NOTE: zscore used all values from both ON and OFF responses
+    trf_der_vec = reduce(vcat, map(diff, trf))
+	trf_der_σ = std(trf_der_vec)
+	trf_der_μ = mean(trf_der_vec)
+
     trf_der = map(trf) do item
         _der = diff(item)
-        _der_z = [0; (_der .- mean(_der)) ./ std(_der)]
+        _der_z = [0; (_der .- trf_der_μ) ./ trf_der_σ]
         _der_z[abs.(_der_z) .< thresh] .= 0
         _der_z
     end
