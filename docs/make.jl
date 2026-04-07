@@ -4,9 +4,7 @@ using SpikeTriggered
 
 EXAMPLE = joinpath(@__DIR__, "src", "examples")
 
-Literate.markdown.([joinpath(EXAMPLE, "raster_psth.jl")],
-                   EXAMPLE;
-                   documenter=true)
+Literate.markdown.([joinpath(EXAMPLE, "raster_psth.jl")], EXAMPLE; documenter=true)
 
 # include("changelog.jl")
 
@@ -22,7 +20,8 @@ makedocs(;
         collapselevel=1,
         repolink="https://taro-station.usc.edu:20443/AnalysisPipeline/SpikeTriggered.jl",
     ),
-    pages=pages)
+    pages=pages,
+)
 
 if get(ENV, "CI", nothing) == "true"
     deploydocs(; repo="github.com/yizhanmiao/SpikeTriggered.jl.git")

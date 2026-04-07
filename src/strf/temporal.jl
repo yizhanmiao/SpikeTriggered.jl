@@ -45,7 +45,11 @@ function trf_segment_biphasic(trf::AbstractVector; by=biphasic_rank_energy)
     zero_crossing_ind0 = find_zero_crossing(trf)
 
     ## no zero crossing found
-    isempty(zero_crossing_ind0) && throw(ArgumentError("no zero crossing found, please make sure it is z-scored or properly mean-shifted!"))
+    isempty(zero_crossing_ind0) && throw(
+        ArgumentError(
+            "no zero crossing found, please make sure it is z-scored or properly mean-shifted!",
+        ),
+    )
 
     ## found all putative triggering-priming pairs
     tp_pairs = map(zero_crossing_ind0) do ind0
@@ -59,7 +63,9 @@ function trf_segment_biphasic(trf::AbstractVector; by=biphasic_rank_energy)
     (triggering_roi, priming_roi) = argmax(i -> by(trf, i...), tp_pairs)
 
     ## biological check
-    last(triggering_roi) < 3 && @warn("triggering phase is too early ($(triggering_roi)), please check if it is biological.")
+    last(triggering_roi) < 3 && @warn(
+        "triggering phase is too early ($(triggering_roi)), please check if it is biological."
+    )
 
     return (; triggering=triggering_roi, priming=priming_roi)
 end
@@ -78,10 +84,11 @@ Returns a named tuple with `trace`, `zerocrossing`, and per-phase statistics
 (`roi`, `start`, `stop`, `peak`, `amplitude`, `magnitude`) for `triggering`
 and `priming`.
 """
-function trf_segment_statistics(trf::AbstractVector, segmentation::NamedTuple; )
+function trf_segment_statistics(trf::AbstractVector, segmentation::NamedTuple;)
     N = length(trf)
 
-    get_crossing_offset(trf, start, stop) = (stop-start) * trf[start] / (trf[start] - trf[stop])
+    get_crossing_offset(trf, start, stop) =
+        (stop-start) * trf[start] / (trf[start] - trf[stop])
 
     t0 = first(segmentation.triggering)
     t_start = t0 == 1 ? 1 : t0 + get_crossing_offset(trf, t0, t0 - 1)
@@ -97,25 +104,27 @@ function trf_segment_statistics(trf::AbstractVector, segmentation::NamedTuple; )
     (p_amplitude, p_peak) = findmax(abs, trf[segmentation.priming])
 
     return (;
-        trace = trf,
+        trace=trf,
         zerocrossing,
-        triggering = (;
-                    roi = segmentation.triggering,
-                    start = t_start,
-                    stop = zerocrossing,
-                    peak = t0 + t_peak - 1,
-                    amplitude = t_amplitude,
-                    magnitude = sum(abs, trf[segmentation.triggering])
-                    ),
-        priming = (;
-                    roi = segmentation.priming,
-                    start = zerocrossing,
-                    stop = p_end,
-                    peak = p0 + p_peak - 1,
-                    amplitude = p_amplitude,
-                    magnitude = sum(abs, trf[segmentation.priming])
-                    ),
+        triggering=(;
+            roi=segmentation.triggering,
+            start=t_start,
+            stop=zerocrossing,
+            peak=t0 + t_peak - 1,
+            amplitude=t_amplitude,
+            magnitude=sum(abs, trf[segmentation.triggering]),
+        ),
+        priming=(;
+            roi=segmentation.priming,
+            start=zerocrossing,
+            stop=p_end,
+            peak=p0 + p_peak - 1,
+            amplitude=p_amplitude,
+            magnitude=sum(abs, trf[segmentation.priming]),
+        ),
     )
 end
 
-trf_segment_statistics(trf::AbstractVector; kwargs...) = trf_segment_statistics(trf, trf_segment_biphasic(trf; kwargs...))
+function trf_segment_statistics(trf::AbstractVector; kwargs...)
+    trf_segment_statistics(trf, trf_segment_biphasic(trf; kwargs...))
+end

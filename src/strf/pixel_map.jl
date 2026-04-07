@@ -13,7 +13,7 @@ Returns a tuple of smoothed, jointly normalised matrices.
 See also: [`get_filtered_mask_full`](@ref), [`srf_pixel_cloud`](@ref).
 """
 function get_filtered_strf(strfs...; s=3)
-    strf_smoothed = map(i->conv(i, ones(s, s)./(s*s))[2:end-1, 2:end-1], strfs)
+    strf_smoothed = map(i->conv(i, ones(s, s) ./ (s*s))[2:(end - 1), 2:(end - 1)], strfs)
     strf_max = maximum(i -> maximum(abs, i), strf_smoothed)
     strf_smoothed_norm = map(i -> i ./ strf_max, strf_smoothed)
     return strf_smoothed_norm
@@ -31,7 +31,7 @@ Create binary masks of elements exceeding half the joint maximum.
 In most cases, prefer [`srf_pixel_cloud`](@ref) which additionally applies flood-fill
 connectivity.
 """
-function get_filtered_mask_full(strfs... ; kwargs...)
+function get_filtered_mask_full(strfs...; kwargs...)
     return map(i -> abs.(i) .> 0.5, get_filtered_strf(strfs...; kwargs...))
 end
 

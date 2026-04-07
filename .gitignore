@@ -15,6 +15,7 @@ playground/
 .DS_Store
 
 docs/build/
+docs/src/examples/*.md
 # pixi environments
 .pixi/*
 !.pixi/config.toml

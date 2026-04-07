@@ -54,7 +54,11 @@ function trf_polarity_score(data; thresh=0.8, reverse_off=true)
         0 + 0 * im
     else
         Ron = data.on[triggering_latency]
-        Roff = reverse_off ? -1 * data.off[triggering_latency] : data.off[triggering_latency]
+        Roff = if reverse_off
+            -1 * data.off[triggering_latency]
+        else
+            data.off[triggering_latency]
+        end
         Ron + Roff * im
     end
 
@@ -71,12 +75,9 @@ function trf_polarity_score(data; thresh=0.8, reverse_off=true)
         :unknown
     end
 
-    return (;
-        triggering_latency,
-        bdscore,
-        bdtheta=rad2deg(bdtheta),
-        bdtype,
-    )
+    return (; triggering_latency, bdscore, bdtheta=rad2deg(bdtheta), bdtype)
 end
 
-trf_polarity_score(on::AbstractTRF, off::AbstractTRF; kwargs...) = trf_polarity_score((; on, off); kwargs...)
+function trf_polarity_score(on::AbstractTRF, off::AbstractTRF; kwargs...)
+    trf_polarity_score((; on, off); kwargs...)
+end

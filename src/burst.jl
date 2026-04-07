@@ -134,7 +134,9 @@ Interpolate burst inter-spike-intervals onto a common grid to generate comparabl
 
 Returns an `n × length(ISI)` matrix.
 """
-function spike_burst_pattern(ISI::AbstractVector{<:AbstractVector{T}}; n=13, degree=Quadratic()) where {T}
+function spike_burst_pattern(
+    ISI::AbstractVector{<:AbstractVector{T}}; n=13, degree=Quadratic()
+) where {T}
     output = zeros(T, n, length(ISI))
     Threads.@threads for i in eachindex(ISI)
         a = ISI[i]

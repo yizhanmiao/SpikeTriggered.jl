@@ -30,7 +30,11 @@ function spike_triggered_average(
     stimulus::AbstractStimulus, psth::AbstractVector; n::Integer=10
 )
     if size(stimulus, 2) != length(psth)
-        throw(ArgumentError("stimulus timepoints ($(size(stimulus, 2))) must match PSTH length ($(length(psth)))"))
+        throw(
+            ArgumentError(
+                "stimulus timepoints ($(size(stimulus, 2))) must match PSTH length ($(length(psth)))",
+            ),
+        )
     end
 
     resp = Circulant(psth)

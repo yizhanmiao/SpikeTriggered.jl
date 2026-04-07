@@ -7,4 +7,4 @@ pages = [
     # "Additional Statistics" => "",
     # "More Examples" => "",
     "APIs" => "api.md",
-    ]
+]

@@ -66,7 +66,6 @@ export trf_segment_statistics
 #TODO: export trf_isbiphasic
 export trf_polarity_score
 
-
 const SpikeRaster{T} = AbstractVector{<:AbstractVector{T}}
 const AbstractSpikeTrain{T} = AbstractVector{T}
 const AbstractPSTH{T} = AbstractVecOrMat{T}    # [nTimepoints] or [nTimepoints x nRepeats]

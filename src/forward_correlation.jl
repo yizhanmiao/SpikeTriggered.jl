@@ -1,5 +1,4 @@
 
-
 @doc raw"""
     spike_raster_groupby(spike_train, marker, marker_mask; kwargs...) -> Vector{Pair{T, SpikeRaster}}
 
@@ -43,7 +42,11 @@ function spike_raster_groupby(
     raster::SpikeRaster{U}, marker_mask::AbstractVector{T}
 ) where {T,U}
     if length(raster) != length(marker_mask)
-        throw(ArgumentError("raster length ($(length(raster))) must equal marker_mask length ($(length(marker_mask)))"))
+        throw(
+            ArgumentError(
+                "raster length ($(length(raster))) must equal marker_mask length ($(length(marker_mask)))",
+            ),
+        )
     end
     _unique_ids = sort(unique(marker_mask))
     return map(_unique_ids) do i
