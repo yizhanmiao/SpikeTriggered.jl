@@ -34,7 +34,6 @@ By default, each element of rasters are spike times relative the *onset* time of
 !!! note
     So far, `spike_raster` assumes that trials are equal duration
 
-
 !!! note
     You can also split rasters into different subgroups (e.g., directions of your drifting grating),
     by using [`spike_raster_groupby`](@ref).
@@ -42,7 +41,9 @@ By default, each element of rasters are spike times relative the *onset* time of
 
 spike_train = sort(rand(1000) .* 50 .- 0.5) # make some fake spikes
 marker_onset = 0:10:40 # fake trial onset time
-spike_raster(spike_train, marker_onset;
+spike_raster(
+    spike_train,
+    marker_onset;
     head=0.5, # include 0.5 seconds before trial onset
     duration=2.0, # each trial lasts for 2 seconds
     tail=0.5, # include 0.5 seconds after each trial
