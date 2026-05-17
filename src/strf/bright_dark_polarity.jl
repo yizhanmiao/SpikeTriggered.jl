@@ -28,11 +28,14 @@ The angle ``\theta`` classifies the cell type:
 - `data`: a NamedTuple (or similar) with fields `:on` and `:off`, each a TRF vector.
   Alternatively, pass `on` and `off` vectors directly.
 - `thresh`: z-score threshold for detecting the first non-zero derivative (default `0.8`).
+- `thresh_data`: threshold the data based on the `thresh` to remove small values (default `true`).
+This can prevent an ON cell becoming ON-OFF when the off response is slightly above zero but not significant.
+This only works when the data is zscored!
 - `reverse_off`: negate the OFF response before combining (default `true`).
 
 Returns `(; triggering_latency, bdscore, bdtheta, bdtype)`.
 """
-function trf_polarity_score(data; thresh=0.8, reverse_off=true)
+function trf_polarity_score(data; thresh=0.8, reverse_off=true, thresh_data=true)
     if !(haskey(data, :on) && haskey(data, :off))
         throw(ArgumentError("data must be a NamedTuple with fields `on` and `off`"))
     end
@@ -63,6 +66,10 @@ function trf_polarity_score(data; thresh=0.8, reverse_off=true)
             -1 * data.off[triggering_latency]
         else
             data.off[triggering_latency]
+        end
+        if thresh_data
+            Ron = abs(Ron) < thresh ? 0 : Ron
+            Roff = abs(Roff) < thresh ? 0 : Roff
         end
         Ron + Roff * im
     end
