@@ -30,7 +30,6 @@ The angle ``\theta`` classifies the cell type:
 - `thresh`: z-score threshold for detecting the first non-zero derivative (default `0.8`).
 - `thresh_data`: threshold the data based on the `thresh` to remove small values (default `true`).
 This can prevent an ON cell becoming ON-OFF when the off response is slightly above zero but not significant.
-This only works when the data is zscored!
 - `reverse_off`: negate the OFF response before combining (default `true`).
 
 Returns `(; triggering_latency, bdscore, bdtheta, bdtype)`.
@@ -61,17 +60,19 @@ function trf_polarity_score(data; thresh=0.8, reverse_off=true, thresh_data=true
     bdscore = if triggering_latency == typemax(Int64)
         0 + 0 * im
     else
-        Ron = data.on[triggering_latency]
-        Roff = if reverse_off
-            -1 * data.off[triggering_latency]
+        (Ron, Roff) = if thresh_data
+            map(zip(trf, trf_der)) do (_t, _td)
+                _t[triggering_latency] * (!iszero(_td[triggering_latency]))
+            end
         else
-            data.off[triggering_latency]
+            map(Base.Fix2(getindex, triggering_latency), trf)
         end
-        if thresh_data
-            Ron = abs(Ron) < thresh ? 0 : Ron
-            Roff = abs(Roff) < thresh ? 0 : Roff
+
+        if reverse_off
+            Ron - Roff * 1im
+        else
+            Ron + Roff * 1im
         end
-        Ron + Roff * im
     end
 
     bdtheta = angle(bdscore)
